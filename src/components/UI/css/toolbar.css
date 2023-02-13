@@ -1,0 +1,80 @@
+.toolbar {
+    position: relative;
+    height: 50px;
+    width: 100vw;
+    display: flex;
+    align-items: center;
+    z-index: 99;
+}
+
+#light .toolbar {
+    background-color: #EFEFEF;
+    border-bottom: 1px solid #dfe2e6;
+}
+
+#dark .toolbar {
+    background-color: #3E3E3E;
+    border-bottom: 1px solid #373535;
+}
+
+#light .undo-icon {
+    padding: 0 15px;
+    height: 50px;
+    width: 20px;
+    fill: #b9b9b9;
+}
+
+#light .redo-icon {
+    padding: 0 15px;
+    height: 50px;
+    width: 20px;
+    fill: #b9b9b9;
+}
+
+#dark .undo-icon {
+    padding: 0 15px;
+    height: 50px;
+    width: 20px;
+    fill: #555353;
+}
+
+#dark .redo-icon {
+    padding: 0 15px;
+    height: 50px;
+    width: 20px;
+    fill: #555353;
+}
+
+#light .toolbar_active_btn {
+    cursor: pointer;
+    fill: black;
+}
+
+#dark .toolbar_active_btn {
+    cursor: pointer;
+    fill: white;
+}
+
+#light .toolbar_active_btn:hover {
+    fill: #1f77eb;
+}
+
+#dark .toolbar_active_btn:hover {
+    fill: #00aeff;
+}
+
+#light .toolbar_borderleft{
+    border-left: 1px solid #dfe2e6;
+}
+
+#light .toolbar_borderright{
+    border-right: 1px solid #dfe2e6;
+}
+
+#dark .toolbar_borderleft{
+    border-left: 1px solid #373535;
+}
+
+#dark .toolbar_borderright{
+    border-right: 1px solid #373535;
+}
