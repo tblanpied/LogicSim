@@ -2,6 +2,7 @@ import "./App.css";
 import Header from "./components/UI/js/header";
 import { createContext, useState } from "react";
 import ToolBar from "./components/UI/js/toolbar";
+import SideBar from "./components/UI/js/sidebar";
 
 export const ThemeContext = createContext(null);
 
@@ -16,6 +17,7 @@ function App() {
       <div className="App" id={theme}>
         <Header></Header>
         <ToolBar></ToolBar>
+        <SideBar></SideBar>
       </div>
     </ThemeContext.Provider>
   );

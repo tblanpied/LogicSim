@@ -17,28 +17,14 @@
     border-bottom: 1px solid #373535;
 }
 
-#light .undo-icon {
+#light .toolbar-icon {
     padding: 0 15px;
     height: 50px;
     width: 20px;
     fill: #b9b9b9;
 }
 
-#light .redo-icon {
-    padding: 0 15px;
-    height: 50px;
-    width: 20px;
-    fill: #b9b9b9;
-}
-
-#dark .undo-icon {
-    padding: 0 15px;
-    height: 50px;
-    width: 20px;
-    fill: #555353;
-}
-
-#dark .redo-icon {
+#dark .toolbar-icon {
     padding: 0 15px;
     height: 50px;
     width: 20px;
