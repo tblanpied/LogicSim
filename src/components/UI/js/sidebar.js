@@ -1,6 +1,9 @@
 import "../css/sidebar.css";
 import React from 'react';
 import {ReactComponent as ArrowLeft} from '../svg/simple-arrow-left.svg';
+import ComponentPicker from "./component_picker";
+import ComponentPickerGroup from "./component_picker_group";
+import ComponentPickerSearch from "./component_picker_search";
 
 class SideBar extends React.Component{
     constructor(props){
@@ -46,6 +49,9 @@ class SideBar extends React.Component{
     render(){
         return(
             <div style={this.state.styles_sidebar} className="sidebar">
+                <ComponentPickerGroup></ComponentPickerGroup>
+                <ComponentPickerSearch></ComponentPickerSearch>
+                <ComponentPicker></ComponentPicker>
                 <button onClick={this._click} className="open_close_sidebar_btn">
                     <ArrowLeft style={this.state.styles_btn}></ArrowLeft>
                 </button>

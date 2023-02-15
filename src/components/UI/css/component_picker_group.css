@@ -1,0 +1,13 @@
+.component_picker_group{
+    height: 60px;
+}
+
+#light .component_picker_group{
+    background-color: #F2F2F2;
+    border-bottom: 1px solid #dfe2e6;
+}
+
+#dark .component_picker_group{
+    background-color: #2F2F2F;
+    border-bottom: 1px solid #373535;
+}

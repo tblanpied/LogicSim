@@ -1,0 +1,39 @@
+.component_picker{
+    position: relative;
+    height: calc(100% - 117px);
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    overflow-x: hidden;
+    overflow-y: scroll;
+    direction: rtl;
+    padding: 0px 8px 0px 8px;
+}
+
+#light .component_picker{
+    background-color: #e6e2e2;
+}
+
+#dark .component_picker{
+    background-color: #242424;
+}
+
+/* For chrome */
+::-webkit-scrollbar {
+    cursor: pointer;
+    width: 3px;
+}
+
+::-webkit-scrollbar-track {
+    display: none;
+}
+
+::-webkit-scrollbar-thumb {
+    background: #707070;
+    border-radius: 2px;
+    width: 3px;
+}
+
+::-webkit-scrollbar-thumb:hover {
+    background: #464545;
+    width: 6px;
+}

@@ -1,7 +1,7 @@
 .sidebar {
     position: relative;
     width: 275px;
-    height: inherit;
+    height: calc(100% - 100px);
     z-index: 98;
     transition: 0.5s left;
 }
@@ -17,8 +17,8 @@
 }
 
 .open_close_sidebar_btn {
-    position: relative;
-    top: 47%;
+    position: absolute;
+    top: 50%;
     left: 265px;
     cursor: pointer;
     border-left: 0;
