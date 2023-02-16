@@ -1,7 +1,7 @@
 import "../css/header.css";
 import React, { useContext } from 'react';
 import ReactSwitch from "react-switch";
-import { ThemeContext } from "../../../App";
+import { ThemeContext } from "../../App";
 import {ReactComponent as SunLogo} from '../svg/sun.svg';
 import {ReactComponent as MoonLogo} from '../svg/moon.svg';
 

@@ -1,0 +1,11 @@
+.seven_segment_display{
+    position: absolute;
+}
+
+.seven_segment_display .IO:hover .center{
+    fill: white;
+}
+
+.segment-active{
+    fill: #df2d2d;
+}
