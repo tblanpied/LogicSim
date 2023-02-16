@@ -3,11 +3,11 @@
 }
 
 #light .component_picker_group{
-    background-color: #F2F2F2;
+    background-color: inherit;
     border-bottom: 1px solid #dfe2e6;
 }
 
 #dark .component_picker_group{
-    background-color: #2F2F2F;
-    border-bottom: 1px solid #373535;
+    background-color: inherit;
+    border-bottom: 1px solid #444444;
 }

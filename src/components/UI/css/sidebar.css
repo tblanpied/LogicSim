@@ -12,8 +12,8 @@
 }
 
 #dark .sidebar{
-    background-color: #2F2F2F;
-    border-right: 1px solid #373535;
+    background-color: #2C2C2C;
+    border-right: 1px solid #444444;
 }
 
 .open_close_sidebar_btn {
@@ -36,7 +36,7 @@
 
 #dark .open_close_sidebar_btn {
     background-color: #2F2F2F;
-    border: 1px solid #373535;
+    border: 1px solid #444444;
 }
 
 .open_close_sidebar_btn svg{

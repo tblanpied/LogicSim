@@ -1,13 +1,39 @@
 .component_picker_search{
-    height: 55px;
+    margin: 10px;
+    position: relative;
+    display: flex;
 }
 
-#light .component_picker_search{
-    background-color: #F2F2F2;
-    border-bottom: 1px solid #dfe2e6;
+.component_search_input{
+    padding: 7px 8px;
+    font-size: 15px;
+    flex-grow: 1;
 }
 
-#dark .component_picker_search{
-    background-color: #2F2F2F;
-    border-bottom: 1px solid #373535;
+.component_search_form{
+    display: flex;
+    flex-grow: 1;
+    align-items: center;
+}
+
+.component_search_btn{
+    background: none;
+    border: 0;
+    position: absolute;
+    right: 7px;
+    top: 5px;
+    padding: 0;
+}
+
+.component_search_logo{
+    width: 25px;
+    height: 25px;
+}
+
+.component_search_logo{
+    fill: #dfdfdf;
+}
+
+.component_search_logo:hover{
+    fill: #575757;
 }

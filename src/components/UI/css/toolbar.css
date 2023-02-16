@@ -13,8 +13,8 @@
 }
 
 #dark .toolbar {
-    background-color: #3E3E3E;
-    border-bottom: 1px solid #373535;
+    background-color: #2C2C2C;
+    border-bottom: 1px solid #444444;
 }
 
 #light .toolbar-icon {
@@ -58,9 +58,9 @@
 }
 
 #dark .toolbar_borderleft{
-    border-left: 1px solid #373535;
+    border-left: 1px solid #444444;
 }
 
 #dark .toolbar_borderright{
-    border-right: 1px solid #373535;
+    border-right: 1px solid #444444;
 }

@@ -1,6 +1,6 @@
 .component_picker{
     position: relative;
-    height: calc(100% - 117px);
+    height: calc(100% - 116px);
     display: grid;
     grid-template-columns: 1fr 1fr;
     overflow-x: hidden;

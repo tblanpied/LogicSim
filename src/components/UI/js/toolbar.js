@@ -27,18 +27,18 @@ class ToolBar extends React.Component{
             <div className="toolbar">
                 <Undo className="toolbar-icon toolbar_active_btn"></Undo>
                 <Redo className="toolbar-icon toolbar_borderright"></Redo>
-                <Copy className="toolbar-icon toolbar_borderleft"></Copy>
+                <Copy className="toolbar-icon"></Copy>
                 <Paste className="toolbar-icon"></Paste>
-                <Delete className="toolbar-icon toolbar_borderright"></Delete>
+                <Delete className="toolbar-icon"></Delete>
                 <RotateLeft className="toolbar-icon toolbar_borderleft"></RotateLeft>
                 <RotateRight className="toolbar-icon toolbar_borderright"></RotateRight>
-                <FlipHorizontal className="toolbar-icon toolbar_borderleft"></FlipHorizontal>
-                <FlipVertical className="toolbar-icon toolbar_borderright"></FlipVertical>
+                <FlipHorizontal className="toolbar-icon"></FlipHorizontal>
+                <FlipVertical className="toolbar-icon"></FlipVertical>
                 <ZoomIn className="toolbar-icon toolbar_borderleft toolbar_active_btn"></ZoomIn>
                 <ZoomOut className="toolbar-icon toolbar_borderright toolbar_active_btn"></ZoomOut>
-                <Select className="toolbar-icon toolbar_borderleft"></Select>
+                <Select className="toolbar-icon"></Select>
                 <SelectArea className="toolbar-icon toolbar_active_btn"></SelectArea>
-                <MoveHand className="toolbar-icon toolbar_borderright toolbar_active_btn"></MoveHand>
+                <MoveHand className="toolbar-icon toolbar_active_btn"></MoveHand>
                 <AnnotAdd className="toolbar-icon toolbar_borderleft toolbar_active_btn"></AnnotAdd>
                 <AnnotVisibility className="toolbar-icon toolbar_borderright toolbar_active_btn"></AnnotVisibility>
             </div>
