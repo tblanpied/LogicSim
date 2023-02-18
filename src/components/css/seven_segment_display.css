@@ -1,8 +1,4 @@
-.seven_segment_display{
-    position: absolute;
-}
-
-.seven_segment_display .IO:hover .center{
+.Component-SevenSegmentDisplay .IO:hover .center{
     fill: white;
 }
 

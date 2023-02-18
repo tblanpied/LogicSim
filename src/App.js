@@ -4,6 +4,7 @@ import { createContext, useState } from "react";
 import ToolBar from "./UI/js/toolbar";
 import SideBar from "./UI/js/sidebar";
 import SevenSegmentDisplay from "./components/js/seven_segment_display";
+import Board from "./UI/js/board";
 
 export const ThemeContext = createContext(null);
 
@@ -19,7 +20,7 @@ function App() {
         <Header></Header>
         <ToolBar></ToolBar>
         <SideBar></SideBar>
-        <SevenSegmentDisplay x="350" y="150" segments='{"a":"on","b":"on","c":"on","d":"on","e":"off","f":"off","g":"on","h":"on"}'></SevenSegmentDisplay>
+        <Board></Board>
       </div>
     </ThemeContext.Provider>
   );
