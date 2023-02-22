@@ -1,0 +1,17 @@
+#light .wire{
+    opacity: 0.0;
+}
+
+#dark .wire{
+    opacity: 0.0;
+}
+
+#light .wire-selected{
+    stroke: #0000ff;
+    opacity: 0.2;
+}
+
+#dark .wire-selected{
+    stroke: #4747ff;
+    opacity: 0.5;
+}

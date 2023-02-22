@@ -13,8 +13,12 @@ class Wire extends React.Component {
 
     this.state = {
       points: props.points,
-      dragging: false
+      dragging: false,
+      selected: props.selected
     };
+
+    this.onClick = props.onClick;
+    this.id = props.id;
 
     this._dragStart = this._dragStart.bind(this);
     this._dragging = this._dragging.bind(this);
@@ -49,10 +53,13 @@ class Wire extends React.Component {
     return (usePound ? "#" : "") + "0".repeat(6 - res.length) + res;
   }
 
-  _dragStart(e) {
+  _dragStart(e, i) {
+    e.stopPropagation();
     this.setState({
       dragging: true
     });
+    document.addEventListener("mousemove", (e) => {this._dragging(e, i);});
+    document.addEventListener("mouseup", this._dragEnd);
   }
 
   _dragging(e, i) {
@@ -68,10 +75,20 @@ class Wire extends React.Component {
     }
   }
 
-  _dragEnd() {
+  _dragEnd(e, i) {
     this.setState({
       dragging: false
     });
+    document.removeEventListener("mousemove", (e) => {this._dragging(e, i);});
+    document.removeEventListener("mouseup", this._dragEnd);
+  }
+
+  componentDidUpdate(prevProps){
+    if(prevProps.selected != this.props.selected){
+      this.setState({
+        selected: this.props.selected
+      });
+    }
   }
 
   render() {
@@ -87,8 +104,10 @@ class Wire extends React.Component {
     var key = 0;
     var radius = 20;
     data += "M" + this.state.points[0].x + "," + this.state.points[0].y;
-    points.push(<g onMouseDown={this._dragStart} onMouseMove={(e) => {this._dragging(e, 0);}} onMouseUp={this._dragEnd} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[0].x} cy={this.state.points[0].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[0].x} cy={this.state.points[0].y} r={3}/></g>);
-    for (let i = 1; i < this.state.points.length - 1; i++) {
+    if(this.state.selected){
+      points.push(<g onMouseDown={(e) => {this._dragStart(e, 0);}} onMouseMove={(e) => {this._dragging(e, 0);}} onMouseUp={(e) => {this._dragEnd(e, 0);}} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[0].x} cy={this.state.points[0].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[0].x} cy={this.state.points[0].y} r={3}/></g>);
+    }
+      for (let i = 1; i < this.state.points.length - 1; i++) {
       var dxa = this.state.points[i].x - this.state.points[i - 1].x;
       var dya = this.state.points[i].y - this.state.points[i - 1].y;
       var dxb = this.state.points[i + 1].x - this.state.points[i].x;
@@ -102,7 +121,6 @@ class Wire extends React.Component {
         y: dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
       };
       var angleBetweenLines = Math.acos((-va.x)*vb.x + (-va.y)*vb.y);
-      console.log(angleBetweenLines);
       var r = radius/Math.tan((angleBetweenLines)/2);
       var ka = {
         x: this.state.points[i - 1].x + (dxa - va.x * r),
@@ -117,13 +135,29 @@ class Wire extends React.Component {
       data += " L" + ka.x + "," + ka.y;
       data += " A" + radius  + " " + radius  + " " + 0 + " " + 0 + " " + (angle(kb, ka, this.state.points[i]) > 0 ? 0 : 1) + " " + kb.x + "," + kb.y;
 
-      points.push(<g onMouseDown={this._dragStart} onMouseMove={(e) => {this._dragging(e, i);}} onMouseUp={this._dragEnd} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[i].x} cy={this.state.points[i].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[i].x} cy={this.state.points[i].y} r={3}/></g>);
+      if(this.state.selected){
+        points.push(<g onMouseDown={(e) => {this._dragStart(e, i);}} onMouseMove={(e) => {this._dragging(e, i);}} onMouseUp={(e) => {this._dragEnd(e, i);}} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[i].x} cy={this.state.points[i].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[i].x} cy={this.state.points[i].y} r={3}/></g>);
+      }
     }
     data += " L" + this.state.points[this.state.points.length - 1].x + "," + this.state.points[this.state.points.length - 1].y;
-    points.push(<g onMouseDown={this._dragStart} onMouseMove={(e) => {this._dragging(e, this.state.points.length - 1);}} onMouseUp={this._dragEnd} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={3}/></g>);
 
+    var opacity = 0;
+    if(this.state.selected){
+      points.push(<g onMouseDown={(e) => {this._dragStart(e, this.state.points.length - 1);}} onMouseMove={(e) => {this._dragging(e, this.state.points.length - 1);}} onMouseUp={(e) => {this._dragEnd(e, this.state.points.length - 1);}} key={key++}><circle key={key++} fill={this.strokeColor} stroke={this.LightenDarkenColor(this.strokeColor, -50)} strokeWidth={2} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={7}/><circle key={key++} fill={this.LightenDarkenColor(this.strokeColor, -50)} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={3}/></g>);
+      opacity = 0.2;
+    }
     return (
       <g>
+        <path
+          className={"wire" + (this.state.selected?"-selected":"")}
+          d={data}
+          fill="none"
+          stroke="#0000ff"
+          strokeWidth={this.strokeWidth*4}
+          strokeLinecap="round"
+          strokeLinejoin="round"
+          onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
+        ></path>
         {this.strokeBorder != 0 ? (
           <path
             d={data}
@@ -132,6 +166,7 @@ class Wire extends React.Component {
             strokeWidth={this.strokeWidth + this.strokeBorder}
             strokeLinecap="round"
             strokeLinejoin="round"
+            onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
           ></path>
         ) : (
           ""
@@ -143,6 +178,7 @@ class Wire extends React.Component {
           strokeWidth={this.strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
+          onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
         ></path>
         {points}
       </g>

@@ -1,10 +1,11 @@
-.board{
+.breadboard{
     position: absolute;
     width: 100%;
     height: 100%;
 }
 
-.board svg{
+.breadboard svg{
     overflow: hidden;
     position: absolute;
+    z-index: 4;
 }

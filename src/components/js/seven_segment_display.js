@@ -14,8 +14,11 @@ class SevenSegmentDisplay extends React.Component {
         y: parseInt(props.y)
       },
       rotation: (props.rotation == undefined?0:props.rotation),
-      segments: props.segments
+      segments: props.segments,
+      selected: props.selected
     };
+    this.onClick = props.onClick;
+    this.id = props.id;
     
     this._dragStart = this._dragStart.bind(this);
     this._dragging = this._dragging.bind(this);
@@ -23,11 +26,15 @@ class SevenSegmentDisplay extends React.Component {
   }
   
   _dragStart(e) {
+    e.stopPropagation();
+    this.onClick(this.id);
     this.setState({
       diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312*Math.sin(this.state.rotation*Math.PI/180),
       diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
       dragging: true,
     });
+    document.addEventListener("mousemove", this._dragging);
+    document.addEventListener("mouseup", this._dragEnd);
   }
 
   _dragging(e) {
@@ -47,12 +54,31 @@ class SevenSegmentDisplay extends React.Component {
       diffY: 0,
       dragging: false,
     });
+    document.removeEventListener("mousemove", this._dragging);
+    document.removeEventListener("mouseup", this._dragEnd);
+  }
+
+  componentDidUpdate(prevProps){
+    if(prevProps.selected != this.props.selected){
+      this.setState({
+        selected: this.props.selected
+      });
+    }
   }
 
   render() {
     return (
       <g onMouseDown={this._dragStart} onMouseMove={this._dragging} onMouseUp={this._dragEnd} transform={"translate(" + this.state.position.x + "," + this.state.position.y + ") rotate(" + this.state.rotation + ")"} className="Component-SevenSegmentDisplay">
         <g className="SevenSegmentDisplay">
+          <rect
+            x="-4.5"
+            y="-4.5"
+            width="249"
+            height="324"
+            rx="13"
+            fill="#0A9DFF"
+            fillOpacity={this.state.selected ? 1 : 0}
+          />
           <rect
             className="base"
             x="1.5"

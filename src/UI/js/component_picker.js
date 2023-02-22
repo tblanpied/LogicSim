@@ -10,7 +10,7 @@ class ComponentPicker extends React.Component{
     render(){
         return(
             <div className="component_picker">
-                <ComponentPickerItem></ComponentPickerItem>
+                <ComponentPickerItem name="7 segment display" icon="/icons/icon-7segmentdisplay.png"></ComponentPickerItem>
                 <ComponentPickerItem></ComponentPickerItem>
                 <ComponentPickerItem></ComponentPickerItem>
                 <ComponentPickerItem></ComponentPickerItem>
