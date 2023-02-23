@@ -28,7 +28,7 @@
 }
 
 #dark .component_picker_item:hover .component_picker_item_name{
-    color: #00aeff69;
+    color: #00aeff;
 }
 
 .component_picker_item_icon{
@@ -54,4 +54,8 @@
     text-overflow: ellipsis;
     overflow: hidden;
     direction: ltr;
+}
+
+#dark .component_picker_item_name{
+    color: white;
 }

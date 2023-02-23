@@ -6,9 +6,10 @@ class SevenSegmentDisplay extends React.Component {
     super(props);
 
     this.state = {
+      new_component: props.new_component==undefined?false:props.new_component,
       diffX: 0,
       diffY: 0,
-      dragging: false,
+      dragging: props.dragging==undefined?false:props.dragging,
       position: {
         x: parseInt(props.x),
         y: parseInt(props.y)
@@ -19,22 +20,38 @@ class SevenSegmentDisplay extends React.Component {
     };
     this.onClick = props.onClick;
     this.id = props.id;
+    this.setCoord = props.setCoord;
     
     this._dragStart = this._dragStart.bind(this);
     this._dragging = this._dragging.bind(this);
     this._dragEnd = this._dragEnd.bind(this);
   }
   
+  componentDidMount(){
+    if(this.state.new_component){
+      this.setState({
+        diffX: 118,
+        diffY: 156,
+      });
+      document.addEventListener("mousemove", this._dragging);
+      document.addEventListener("mouseup", this._dragEnd);
+    }
+  }
+
   _dragStart(e) {
     e.stopPropagation();
-    this.onClick(this.id);
-    this.setState({
-      diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312*Math.sin(this.state.rotation*Math.PI/180),
-      diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
-      dragging: true,
-    });
-    document.addEventListener("mousemove", this._dragging);
-    document.addEventListener("mouseup", this._dragEnd);
+    if(e.button == 0){
+      this.onClick(this.id)
+    if(!this.state.new_component){
+      this.setState({
+        diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312*Math.sin(this.state.rotation*Math.PI/180),
+        diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
+        dragging: true,
+      });
+      document.addEventListener("mousemove", this._dragging);
+      document.addEventListener("mouseup", this._dragEnd);
+    }
+    }
   }
 
   _dragging(e) {
@@ -45,17 +62,20 @@ class SevenSegmentDisplay extends React.Component {
           y: e.pageY - this.state.diffY
         }
       });
+      this.setCoord(this.id,e.pageX - this.state.diffX, e.pageY - this.state.diffY);
     }
   }
 
   _dragEnd() {
-    this.setState({
-      diffX: 0,
-      diffY: 0,
-      dragging: false,
-    });
-    document.removeEventListener("mousemove", this._dragging);
-    document.removeEventListener("mouseup", this._dragEnd);
+    if(!this.state.new_component){
+      this.setState({
+        diffX: 0,
+        diffY: 0,
+        dragging: false,
+      });
+      document.removeEventListener("mousemove", this._dragging);
+      document.removeEventListener("mouseup", this._dragEnd);
+    }
   }
 
   componentDidUpdate(prevProps){
