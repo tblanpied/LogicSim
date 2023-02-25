@@ -6,32 +6,33 @@ class SevenSegmentDisplay extends React.Component {
     super(props);
 
     this.state = {
-      new_component: props.new_component==undefined?false:props.new_component,
+      new_component: props.new_component === undefined ? false : props.new_component,
       diffX: 0,
       diffY: 0,
-      dragging: props.dragging==undefined?false:props.dragging,
+      dragging: props.dragging === undefined ? false : props.dragging,
       position: {
         x: parseInt(props.x),
         y: parseInt(props.y)
       },
-      rotation: (props.rotation == undefined?0:props.rotation),
+      rotation: (props.rotation === undefined ? 0 : props.rotation),
       segments: props.segments,
       selected: props.selected,
-      opacity: props.opacity==undefined?1:props.opacity
+      opacity: props.opacity === undefined ? 1 : props.opacity
     };
     this.onClick = props.onClick;
     this.id = props.id;
     this.setCoord = props.setCoord;
+    this.endWire = props.endWire;
 
-    this.start_position = {x:0, y:0};
-    
+    this.start_position = { x: 0, y: 0 };
+
     this._dragStart = this._dragStart.bind(this);
     this._dragging = this._dragging.bind(this);
     this._dragEnd = this._dragEnd.bind(this);
   }
-  
-  componentDidMount(){
-    if(this.state.new_component){
+
+  componentDidMount() {
+    if (this.state.new_component) {
       this.setState({
         diffX: 118,
         diffY: 156,
@@ -43,36 +44,36 @@ class SevenSegmentDisplay extends React.Component {
 
   _dragStart(e) {
     e.stopPropagation();
-    if(e.button == 0){
+    if (e.button === 0) {
       this.onClick(this.id)
-    if(!this.state.new_component){
-      this.start_position.x = e.pageX;
-      this.start_position.y = e.pageY;
-      this.setState({
-        diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312*Math.sin(this.state.rotation*Math.PI/180),
-        diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
-        dragging: true,
-      });
-      document.addEventListener("mousemove", this._dragging);
-      document.addEventListener("mouseup", this._dragEnd);
-    }
+      if (!this.state.new_component) {
+        this.start_position.x = e.pageX;
+        this.start_position.y = e.pageY;
+        this.setState({
+          diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312 * Math.sin(this.state.rotation * Math.PI / 180),
+          diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
+          dragging: true,
+        });
+        document.addEventListener("mousemove", this._dragging);
+        document.addEventListener("mouseup", this._dragEnd);
+      }
     }
   }
 
   _dragging(e) {
-    if (this.state.dragging && (this.start_position.x != e.pageX || this.start_position.y != e.pageY)) {
+    if (this.state.dragging && (this.start_position.x !== e.pageX || this.start_position.y !== e.pageY)) {
       this.setState({
         position: {
           x: e.pageX - this.state.diffX,
           y: e.pageY - this.state.diffY
         }
       });
-      this.setCoord(this.id,e.pageX - this.state.diffX, e.pageY - this.state.diffY);
+      this.setCoord(this.id, e.pageX - this.state.diffX, e.pageY - this.state.diffY);
     }
   }
 
   _dragEnd() {
-    if(!this.state.new_component){
+    if (!this.state.new_component) {
       this.setState({
         diffX: 0,
         diffY: 0,
@@ -83,8 +84,8 @@ class SevenSegmentDisplay extends React.Component {
     }
   }
 
-  componentDidUpdate(prevProps){
-    if(prevProps.selected != this.props.selected){
+  componentDidUpdate(prevProps) {
+    if (prevProps.selected !== this.props.selected) {
       this.setState({
         selected: this.props.selected
       });
@@ -182,7 +183,7 @@ class SevenSegmentDisplay extends React.Component {
             stroke="black"
           />
         </g>
-        <g className="IO In-h">
+        <g className="IO In-h" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 7)} }>
           <g className="left-bottom">
             <mask id="path-10-inside-1_28_439" fill="white">
               <path
@@ -247,7 +248,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-g">
+        <g className="IO In-g" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 6)} }>
           <g className="left-bottom">
             <mask id="path-19-inside-5_28_439" fill="white">
               <path
@@ -312,7 +313,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-f">
+        <g className="IO In-f" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 5)} }>
           <g className="left-bottom">
             <mask id="path-28-inside-9_28_439" fill="white">
               <path
@@ -377,7 +378,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-e">
+        <g className="IO In-e" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 4)} }>
           <g className="left-bottom">
             <mask id="path-37-inside-13_28_439" fill="white">
               <path
@@ -442,7 +443,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-d">
+        <g className="IO In-d" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 3)} }>
           <g className="left-bottom">
             <mask id="path-46-inside-17_28_439" fill="white">
               <path
@@ -507,7 +508,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-c">
+        <g className="IO In-c" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 2)} }>
           <g className="left-bottom">
             <mask id="path-55-inside-21_28_439" fill="white">
               <path
@@ -572,7 +573,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-b">
+        <g className="IO In-b" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 1)} }>
           <g className="left-bottom">
             <mask id="path-64-inside-25_28_439" fill="white">
               <path
@@ -631,7 +632,7 @@ class SevenSegmentDisplay extends React.Component {
           </g>
           <circle className="center" cx="20.5" cy="95.5" r="5" fill="#191919" />
         </g>
-        <g className="IO In-a">
+        <g className="IO In-a" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 0)} }>
           <g className="left-bottom">
             <mask id="path-73-inside-29_28_439" fill="white">
               <path

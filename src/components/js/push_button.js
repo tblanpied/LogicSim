@@ -6,8 +6,8 @@ class PushButton extends React.Component {
         super(props);
 
         this.state = {
-            active: props.active == undefined ? false : props.active,
-            new_component: props.new_component == undefined ? false : props.new_component,
+            active: props.active === undefined ? false : props.active,
+            new_component: props.new_component === undefined ? false : props.new_component,
             dragging: false,
             position: {
                 x: parseInt(props.x),
@@ -16,14 +16,16 @@ class PushButton extends React.Component {
             diffX: 0,
             diffY: 0,
             selected: props.selected,
-            opacity: props.opacity == undefined ? 1 : props.opacity,
-            rotation: (props.rotation == undefined ? 0 : props.rotation)
+            opacity: props.opacity === undefined ? 1 : props.opacity,
+            rotation: (props.rotation === undefined ? 0 : props.rotation)
         };
         this.onClick = props.onClick;
         this.setCoord = props.setCoord;
         this.id = props.id;
 
         this.start_position = {x:0, y:0};
+
+        this.startWire = props.startWire;
 
         this._dragStart = this._dragStart.bind(this);
         this._dragging = this._dragging.bind(this);
@@ -46,7 +48,7 @@ class PushButton extends React.Component {
 
     _dragStart(e) {
         e.stopPropagation();
-        if (e.button == 0) {
+        if (e.button === 0) {
             this.onClick(this.id)
             if (!this.state.new_component) {
                 this.start_position.x = e.pageX;
@@ -63,7 +65,7 @@ class PushButton extends React.Component {
     }
 
     _dragging(e) {
-        if (this.state.dragging && (this.start_position.x != e.pageX || this.start_position.y != e.pageY)) {
+        if (this.state.dragging && (this.start_position.x !== e.pageX || this.start_position.y !== e.pageY)) {
             this.setState({
                 position: {
                     x: e.pageX - this.state.diffX,
@@ -87,7 +89,7 @@ class PushButton extends React.Component {
     }
 
     componentDidUpdate(prevProps) {
-        if (prevProps.selected != this.props.selected) {
+        if (prevProps.selected !== this.props.selected) {
             this.setState({
                 selected: this.props.selected
             });
@@ -120,7 +122,7 @@ class PushButton extends React.Component {
                         <circle onMouseDown={this._buttonPress} onMouseUp={this._buttonRelease} cx="41.5" cy="40.5" r="37.5" fill={this.state.active?"#ea2828":"#531F21"} />
                         <circle cx="41.5" cy="40.5" r="35" stroke="black" strokeWidth="5" />
                     </g>
-                    <circle className="Output" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
+                    <circle onMouseDown={(e) => {this.startWire(e,this.id, "pushbutton", 0)} } className="Output" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
                 </g>
                 <defs>
                     <filter id="filter0_d_3_2" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">

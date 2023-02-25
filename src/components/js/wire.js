@@ -5,17 +5,19 @@ class Wire extends React.Component {
   constructor(props) {
     super(props);
 
-    this.strokeWidth = props.strokeWidth == undefined ? 1 : props.strokeWidth;
-    this.strokeColor = props.strokeColor == undefined ? "#000000" : props.strokeColor;
-    this.strokeBorder = props.strokeBorder == undefined ? 0 : props.strokeBorder;
+    this.strokeWidth = props.strokeWidth === undefined ? 1 : props.strokeWidth;
+    this.strokeColor = props.strokeColor === undefined ? "#000000" : props.strokeColor;
+    this.strokeBorder = props.strokeBorder === undefined ? 0 : props.strokeBorder;
     this.inactiveColor = this.LightenDarkenColor(this.strokeColor, -175);
 
     this.state = {
       points: props.points,
       dragging: false,
       selected: props.selected,
-      active: props.active==undefined?false:props.active
+      active: props.active === undefined ? false : props.active,
+      style: props.style === undefined ? {} : props.style
     };
+
 
     this.onClick = props.onClick;
     this.id = props.id;
@@ -27,7 +29,7 @@ class Wire extends React.Component {
 
   LightenDarkenColor(col, amt) {
     var usePound = false;
-    if (col[0] == "#") {
+    if (col[0] === "#") {
       col = col.slice(1);
       usePound = true;
     }
@@ -58,14 +60,14 @@ class Wire extends React.Component {
     this.setState({
       dragging: true
     });
-    document.addEventListener("mousemove", (e) => {this._dragging(e, i);});
+    document.addEventListener("mousemove", (e) => { this._dragging(e, i); });
     document.addEventListener("mouseup", this._dragEnd);
   }
 
   _dragging(e, i) {
     if (this.state.dragging) {
       let points = [...this.state.points];
-      let point = {...points[i]};
+      let point = { ...points[i] };
       point.x = e.pageX;
       point.y = e.pageY;
       points[i] = point;
@@ -79,35 +81,41 @@ class Wire extends React.Component {
     this.setState({
       dragging: false
     });
-    document.removeEventListener("mousemove", (e) => {this._dragging(e, i);});
+    document.removeEventListener("mousemove", (e) => { this._dragging(e, i); });
     document.removeEventListener("mouseup", this._dragEnd);
   }
 
-  componentDidUpdate(prevProps){
-    if(prevProps.selected != this.props.selected){
+  componentDidUpdate(prevProps) {
+    if (prevProps.selected !== this.props.selected) {
       this.setState({
         selected: this.props.selected
+      });
+    }
+    if (prevProps.points.length !== this.props.points.length) {
+      this.setState({
+        points: this.props.points
       });
     }
   }
 
   render() {
+    //console.log(this.state.points);
     const angle = (A, B, C) =>
-        ((Math.atan2(C.y - B.y, C.x - B.x) -
-          Math.atan2(A.y - B.y, A.x - B.x) +
-          3 * Math.PI) %
-          (2 * Math.PI)) -
-        Math.PI;
+      ((Math.atan2(C.y - B.y, C.x - B.x) -
+        Math.atan2(A.y - B.y, A.x - B.x) +
+        3 * Math.PI) %
+        (2 * Math.PI)) -
+      Math.PI;
 
     var data = "";
     var points = [];
     var key = 0;
     data += "M" + this.state.points[0].x + "," + this.state.points[0].y;
-    if(this.state.selected){
-      points.push(<g onMouseDown={(e) => {this._dragStart(e, 0);}} onMouseMove={(e) => {this._dragging(e, 0);}} onMouseUp={(e) => {this._dragEnd(e, 0);}} key={key++}><circle key={key++} fill={this.state.active?this.strokeColor:this.inactiveColor} stroke={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} strokeWidth={2} cx={this.state.points[0].x} cy={this.state.points[0].y} r={7}/><circle key={key++} fill={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} cx={this.state.points[0].x} cy={this.state.points[0].y} r={3}/></g>);
+    if (this.state.selected) {
+      points.push(<g onMouseDown={(e) => { this._dragStart(e, 0); }} onMouseMove={(e) => { this._dragging(e, 0); }} onMouseUp={(e) => { this._dragEnd(e, 0); }} key={key++}><circle key={key++} fill={this.state.active ? this.strokeColor : this.inactiveColor} stroke={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} strokeWidth={2} cx={this.state.points[0].x} cy={this.state.points[0].y} r={7} /><circle key={key++} fill={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} cx={this.state.points[0].x} cy={this.state.points[0].y} r={3} /></g>);
     }
-      for (let i = 1; i < this.state.points.length - 1; i++) {
-        var radius = 20;
+    for (let i = 1; i < this.state.points.length - 1; i++) {
+      var radius = 20;
       var dxa = this.state.points[i].x - this.state.points[i - 1].x;
       var dya = this.state.points[i].y - this.state.points[i - 1].y;
       var dxb = this.state.points[i + 1].x - this.state.points[i].x;
@@ -120,15 +128,15 @@ class Wire extends React.Component {
         x: dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
         y: dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
       };
-      var angleBetweenLines = Math.acos((-va.x)*vb.x + (-va.y)*vb.y);
-      var r = radius/Math.tan((angleBetweenLines)/2);
-      if(r > 25){
+      var angleBetweenLines = Math.acos((-va.x) * vb.x + (-va.y) * vb.y);
+      var r = radius / Math.tan((angleBetweenLines) / 2);
+      if (r > 25) {
         r = 25;
-        radius = Math.tan((angleBetweenLines)/2)*r;
+        radius = Math.tan((angleBetweenLines) / 2) * r;
       }
-      if(r != Math.min(r, Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)), Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)))){
+      if (r !== Math.min(r, Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)), Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)))) {
         r = Math.min(Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)), Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)));
-        radius = Math.tan((angleBetweenLines)/2)*r;
+        radius = Math.tan((angleBetweenLines) / 2) * r;
       }
       var ka = {
         x: this.state.points[i - 1].x + (dxa - va.x * r),
@@ -138,42 +146,40 @@ class Wire extends React.Component {
         x: this.state.points[i].x + vb.x * r,
         y: this.state.points[i].y + vb.y * r,
       };
-      var c = { x: ka.x + (ka.x - kb.x) / 2, y: ka.y + (ka.y - kb.y) / 2 };
+      //var c = { x: ka.x + (ka.x - kb.x) / 2, y: ka.y + (ka.y - kb.y) / 2 };
 
       data += " L" + ka.x + "," + ka.y;
-      data += " A" + radius  + " " + radius  + " " + 0 + " " + 0 + " " + (angle(kb, ka, this.state.points[i]) > 0 ? 0 : 1) + " " + kb.x + "," + kb.y;
+      data += " A" + radius + " " + radius + " " + 0 + " " + 0 + " " + (angle(kb, ka, this.state.points[i]) > 0 ? 0 : 1) + " " + kb.x + "," + kb.y;
 
-      if(this.state.selected){
-        points.push(<g onMouseDown={(e) => {this._dragStart(e, i);}} onMouseMove={(e) => {this._dragging(e, i);}} onMouseUp={(e) => {this._dragEnd(e, i);}} key={key++}><circle key={key++} fill={this.state.active?this.strokeColor:this.inactiveColor} stroke={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} strokeWidth={2} cx={this.state.points[i].x} cy={this.state.points[i].y} r={7}/><circle key={key++} fill={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} cx={this.state.points[i].x} cy={this.state.points[i].y} r={3}/></g>);
+      if (this.state.selected) {
+        points.push(<g onMouseDown={(e) => { this._dragStart(e, i); }} onMouseMove={(e) => { this._dragging(e, i); }} onMouseUp={(e) => { this._dragEnd(e, i); }} key={key++}><circle key={key++} fill={this.state.active ? this.strokeColor : this.inactiveColor} stroke={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} strokeWidth={2} cx={this.state.points[i].x} cy={this.state.points[i].y} r={7} /><circle key={key++} fill={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} cx={this.state.points[i].x} cy={this.state.points[i].y} r={3} /></g>);
       }
     }
     data += " L" + this.state.points[this.state.points.length - 1].x + "," + this.state.points[this.state.points.length - 1].y;
 
-    var opacity = 0;
-    if(this.state.selected){
-      points.push(<g onMouseDown={(e) => {this._dragStart(e, this.state.points.length - 1);}} onMouseMove={(e) => {this._dragging(e, this.state.points.length - 1);}} onMouseUp={(e) => {this._dragEnd(e, this.state.points.length - 1);}} key={key++}><circle key={key++} fill={this.state.active?this.strokeColor:this.inactiveColor} stroke={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} strokeWidth={2} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={7}/><circle key={key++} fill={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={3}/></g>);
-      opacity = 0.2;
+    if (this.state.selected) {
+      points.push(<g onMouseDown={(e) => { this._dragStart(e, this.state.points.length - 1); }} onMouseMove={(e) => { this._dragging(e, this.state.points.length - 1); }} onMouseUp={(e) => { this._dragEnd(e, this.state.points.length - 1); }} key={key++}><circle key={key++} fill={this.state.active ? this.strokeColor : this.inactiveColor} stroke={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} strokeWidth={2} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={7} /><circle key={key++} fill={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={3} /></g>);
     }
     return (
-      <g>
+      <g style={this.state.style}>
         <path
-          className={"wire" + (this.state.selected?"-selected":"")}
+          className={"wire" + (this.state.selected ? "-selected" : "")}
           d={data}
           fill="none"
-          strokeWidth={this.strokeWidth*4}
+          strokeWidth={this.strokeWidth * 4}
           strokeLinecap="round"
           strokeLinejoin="round"
-          onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
+          onMouseDown={(e) => { e.stopPropagation(); this.onClick(this.id); }}
         ></path>
-        {this.strokeBorder != 0 ? (
+        {this.strokeBorder !== 0 ? (
           <path
             d={data}
             fill="none"
-            stroke={this.state.active?this.LightenDarkenColor(this.strokeColor,-50):this.LightenDarkenColor(this.inactiveColor,-25)}
+            stroke={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)}
             strokeWidth={this.strokeWidth + this.strokeBorder}
             strokeLinecap="round"
             strokeLinejoin="round"
-            onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
+            onMouseDown={(e) => { e.stopPropagation(); this.onClick(this.id); }}
           ></path>
         ) : (
           ""
@@ -181,11 +187,11 @@ class Wire extends React.Component {
         <path
           d={data}
           fill="none"
-          stroke={this.state.active?this.strokeColor:this.inactiveColor}
+          stroke={this.state.active ? this.strokeColor : this.inactiveColor}
           strokeWidth={this.strokeWidth}
           strokeLinecap="round"
           strokeLinejoin="round"
-          onMouseDown={(e) => {e.stopPropagation();this.onClick(this.id);}}
+          onMouseDown={(e) => { e.stopPropagation(); this.onClick(this.id); }}
         ></path>
         {points}
       </g>
