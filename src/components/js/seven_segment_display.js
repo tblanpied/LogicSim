@@ -16,11 +16,14 @@ class SevenSegmentDisplay extends React.Component {
       },
       rotation: (props.rotation == undefined?0:props.rotation),
       segments: props.segments,
-      selected: props.selected
+      selected: props.selected,
+      opacity: props.opacity==undefined?1:props.opacity
     };
     this.onClick = props.onClick;
     this.id = props.id;
     this.setCoord = props.setCoord;
+
+    this.start_position = {x:0, y:0};
     
     this._dragStart = this._dragStart.bind(this);
     this._dragging = this._dragging.bind(this);
@@ -43,6 +46,8 @@ class SevenSegmentDisplay extends React.Component {
     if(e.button == 0){
       this.onClick(this.id)
     if(!this.state.new_component){
+      this.start_position.x = e.pageX;
+      this.start_position.y = e.pageY;
       this.setState({
         diffX: e.pageX - e.currentTarget.getBoundingClientRect().left - 312*Math.sin(this.state.rotation*Math.PI/180),
         diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
@@ -55,7 +60,7 @@ class SevenSegmentDisplay extends React.Component {
   }
 
   _dragging(e) {
-    if (this.state.dragging) {
+    if (this.state.dragging && (this.start_position.x != e.pageX || this.start_position.y != e.pageY)) {
       this.setState({
         position: {
           x: e.pageX - this.state.diffX,
@@ -88,7 +93,7 @@ class SevenSegmentDisplay extends React.Component {
 
   render() {
     return (
-      <g onMouseDown={this._dragStart} onMouseMove={this._dragging} onMouseUp={this._dragEnd} transform={"translate(" + this.state.position.x + "," + this.state.position.y + ") rotate(" + this.state.rotation + ")"} className="Component-SevenSegmentDisplay">
+      <g opacity={this.state.opacity} onMouseDown={this._dragStart} onMouseMove={this._dragging} onMouseUp={this._dragEnd} transform={"translate(" + this.state.position.x + "," + this.state.position.y + ") rotate(" + this.state.rotation + ")"} className="Component-SevenSegmentDisplay">
         <g className="SevenSegmentDisplay">
           <rect
             x="-4.5"

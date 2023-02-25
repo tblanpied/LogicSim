@@ -11,28 +11,7 @@ class ComponentPicker extends React.Component{
         return(
             <div className="component_picker">
                 <ComponentPickerItem name="7 segment display" icon="/icons/icon-7segmentdisplay.png"></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
-                <ComponentPickerItem></ComponentPickerItem>
+                <ComponentPickerItem name="push button" icon="/icons/icon-PushButton.png"></ComponentPickerItem>
             </div>
         );
     }

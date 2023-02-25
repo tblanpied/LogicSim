@@ -54,6 +54,7 @@
     text-overflow: ellipsis;
     overflow: hidden;
     direction: ltr;
+    font-family: 'Courier New', Courier, monospace;
 }
 
 #dark .component_picker_item_name{
