@@ -195,7 +195,7 @@ class BreadBoard extends React.Component {
       this.setState({
         drawingWirePoints: [],
         drawingWire: false,
-        wires: [...this.state.wires, { id: new_id }]
+        wires: [...this.state.wires, { id: new_id, start: {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index}, end: {id: id, type: type, index:index}}]
       });
 
       this.setConnection(this.component_start_wire, {type: type, id: id, index: index}, new_id);
@@ -233,7 +233,7 @@ class BreadBoard extends React.Component {
 
     var wires = [];
     for (let i = 0; i < this.state.wires.length; i++) {
-      wires.push(<Wire key={this.state.wires[i].id} active={true} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
+      wires.push(<Wire start={this.state.wires[i].start} end={this.state.wires[i].end} key={this.state.wires[i].id} active={true} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
     }
 
     var new_component = []
@@ -256,7 +256,6 @@ class BreadBoard extends React.Component {
           <g>
             {components}
             <SevenSegmentDisplay id={1} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === 1} x="350" y="150" segments={{ a: true, b: true, c: true, d: true, e: false, f: false, g: true, h: true }}></SevenSegmentDisplay>
-            <Wire active={true} id={0} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === 0} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={[{ x: 100, y: 150 }, { x: 150, y: 300 }, { x: 200, y: 150 }, { x: 400, y: 150 }, { x: 400, y: 500 }]}></Wire>
             {new_component}
             {drawingWire}
             {wires}

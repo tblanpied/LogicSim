@@ -1,17 +1,17 @@
-#light .wire{
+#light .wire-background{
     opacity: 0.0;
 }
 
-#dark .wire{
+#dark .wire-background{
     opacity: 0.0;
 }
 
-#light .wire-selected{
+#light .wire-background-selected{
     stroke: #0000ff;
     opacity: 0.2;
 }
 
-#dark .wire-selected{
+#dark .wire-background-selected{
     stroke: #4747ff;
     opacity: 0.5;
 }

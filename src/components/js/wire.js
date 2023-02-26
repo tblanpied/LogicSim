@@ -15,7 +15,9 @@ class Wire extends React.Component {
       dragging: false,
       selected: props.selected,
       active: props.active === undefined ? false : props.active,
-      style: props.style === undefined ? {} : props.style
+      style: props.style === undefined ? {} : props.style,
+      start: props.start,
+      end: props.end
     };
 
 
@@ -26,6 +28,65 @@ class Wire extends React.Component {
     this._dragging = this._dragging.bind(this);
     this._dragEnd = this._dragEnd.bind(this);
   }
+
+  componentDidMount(){
+    if(this.state.end != undefined && this.state.start != undefined){
+      const targetend = document.getElementsByClassName("Component-" + this.state.end.type + "-" + this.state.end.id);
+      var observer = null;
+      observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if(mutation.attributeName == 'transform'){
+            var input = targetend[0].getElementsByClassName("In-" + this.state.end.index)[0];
+            var center = {
+              x: input.getBoundingClientRect().left + input.getBoundingClientRect().width / 2,
+              y: input.getBoundingClientRect().top + input.getBoundingClientRect().height / 2
+            };
+            this.setState({
+              points: this.state.points.map((c,i)=>{
+                if(i == this.state.points.length-1){
+                  c.x = center.x;
+                  c.y = center.y
+                  return c;
+                }
+                else{
+                  return c;
+                }
+              })
+            });
+          }
+        });
+      });
+      const config = {attributes: true};
+      observer.observe(targetend[0], config);
+
+      const targetstart = document.getElementsByClassName("Component-" + this.state.start.type + "-" + this.state.start.id);
+      observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+          if(mutation.attributeName == 'transform'){
+            var output = targetstart[0].getElementsByClassName("Out-" + this.state.start.index)[0];
+            var center = {
+              x: output.getBoundingClientRect().left + output.getBoundingClientRect().width / 2,
+              y: output.getBoundingClientRect().top + output.getBoundingClientRect().height / 2
+            };
+            this.setState({
+              points: this.state.points.map((c,i)=>{
+                if(i == 0){
+                  c.x = center.x;
+                  c.y = center.y
+                  return c;
+                }
+                else{
+                  return c;
+                }
+              })
+            });
+          }
+        });
+      });
+      observer.observe(targetstart[0], config);
+    }
+  }
+  
 
   LightenDarkenColor(col, amt) {
     var usePound = false;
@@ -161,9 +222,9 @@ class Wire extends React.Component {
       points.push(<g onMouseDown={(e) => { this._dragStart(e, this.state.points.length - 1); }} onMouseMove={(e) => { this._dragging(e, this.state.points.length - 1); }} onMouseUp={(e) => { this._dragEnd(e, this.state.points.length - 1); }} key={key++}><circle key={key++} fill={this.state.active ? this.strokeColor : this.inactiveColor} stroke={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} strokeWidth={2} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={7} /><circle key={key++} fill={this.state.active ? this.LightenDarkenColor(this.strokeColor, -50) : this.LightenDarkenColor(this.inactiveColor, -25)} cx={this.state.points[this.state.points.length - 1].x} cy={this.state.points[this.state.points.length - 1].y} r={3} /></g>);
     }
     return (
-      <g style={this.state.style}>
+      <g className="wire" style={this.state.style}>
         <path
-          className={"wire" + (this.state.selected ? "-selected" : "")}
+          className={"wire-background" + (this.state.selected ? "-selected" : "")}
           d={data}
           fill="none"
           strokeWidth={this.strokeWidth * 4}
