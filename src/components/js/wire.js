@@ -19,7 +19,7 @@ class Wire extends React.Component {
       start: props.start,
       end: props.end
     };
-
+    this.onStateChange = props.onStateChange;
 
     this.onClick = props.onClick;
     this.id = props.id;
@@ -157,6 +157,12 @@ class Wire extends React.Component {
         points: this.props.points
       });
     }
+    if (prevProps.active !== this.props.active) {
+      this.setState({
+        active: this.props.active
+      });
+      this.onStateChange(this.state.end.id, this.props.active, this.state.end.index);
+    }
   }
 
   render() {
@@ -182,15 +188,18 @@ class Wire extends React.Component {
       var dxb = this.state.points[i + 1].x - this.state.points[i].x;
       var dyb = this.state.points[i + 1].y - this.state.points[i].y;
       var va = {
-        x: dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
-        y: dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+        x: dxa+dya == 0? 0 : dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+        y: dxa+dya == 0? 0 : dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
       };
       var vb = {
-        x: dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
-        y: dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+        x: dxb+dyb == 0? 0 : dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+        y: dxb+dyb == 0? 0 : dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
       };
       var angleBetweenLines = Math.acos((-va.x) * vb.x + (-va.y) * vb.y);
-      var r = radius / Math.tan((angleBetweenLines) / 2);
+      var r = 0;
+      if(Math.tan((angleBetweenLines) / 2) != 0){
+        r = radius / Math.tan((angleBetweenLines) / 2);
+      }
       if (r > 25) {
         r = 25;
         radius = Math.tan((angleBetweenLines) / 2) * r;

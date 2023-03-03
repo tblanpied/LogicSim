@@ -21,6 +21,7 @@ class PushButton extends React.Component {
         };
         this.onClick = props.onClick;
         this.setCoord = props.setCoord;
+        this.onStateChange = props.onStateChange;
         this.id = props.id;
 
         this.start_position = {x:0, y:0};
@@ -101,6 +102,7 @@ class PushButton extends React.Component {
             this.setState({
                 active: true
             });
+            this.onStateChange(this.id, true, 0);
         }
     }
 
@@ -109,6 +111,7 @@ class PushButton extends React.Component {
             this.setState({
                 active: false
             });
+            this.onStateChange(this.id, false, 0);
         }
     }
 

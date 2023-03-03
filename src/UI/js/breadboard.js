@@ -32,6 +32,8 @@ class BreadBoard extends React.Component {
     this.addWirePoint = this.addWirePoint.bind(this);
     this.stopDrawingWire = this.stopDrawingWire.bind(this);
     this.endWire = this.endWire.bind(this);
+    this.changeComponentOutputState = this.changeComponentOutputState.bind(this);
+    this.changeComponentInputState = this.changeComponentInputState.bind(this);
   }
 
   componentDidMount() {
@@ -195,7 +197,7 @@ class BreadBoard extends React.Component {
       this.setState({
         drawingWirePoints: [],
         drawingWire: false,
-        wires: [...this.state.wires, { id: new_id, start: {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index}, end: {id: id, type: type, index:index}}]
+        wires: [...this.state.wires, { id: new_id, start: {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index}, end: {id: id, type: type, index:index}, active: false}]
       });
 
       this.setConnection(this.component_start_wire, {type: type, id: id, index: index}, new_id);
@@ -220,20 +222,79 @@ class BreadBoard extends React.Component {
     })
   }
 
+  changeComponentOutputState(id, state, index){
+    var wireId = null;
+    this.setState({
+      components: this.state.components.map((c,i)=>{
+        if(c.id == id){
+          c.outputs.map((c,i)=>{
+            if(i == index){
+              c.state = state;
+              if(c.connection != null){
+                wireId = c.connection.wireId;
+              }
+              return c
+            }
+            else{
+              return c
+            }
+          });
+          return c;
+        }else{  
+          return c;
+        }
+      })
+    });
+    if(wireId != null){
+      this.setState({
+        wires: this.state.wires.map((c,i)=>{
+          if(c.id == wireId){
+            c.active = state;
+            return c;
+          }
+          else{
+            return c;
+          }
+        })
+      });
+    }
+  }
+
+  changeComponentInputState(id, state, index){
+    this.setState({
+      components: this.state.components.map((c,i)=>{
+        if(c.id == id){
+          c.inputs.map((c,i)=>{
+            if(i == index){
+              c.state = state;
+              return c
+            }
+            else{
+              return c
+            }
+          });
+          return c;
+        }else{  
+          return c;
+        }
+      })
+    });
+  }
+
   render() {
     var components = []
     for (let i = 0; i < this.state.components.length; i++) {
       if (this.state.components[i].type === "7segmentdisplay") {
-        components.push(<SevenSegmentDisplay endWire={this.endWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false }}></SevenSegmentDisplay>);
+        components.push(<SevenSegmentDisplay endWire={this.endWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state, c: this.state.components[i].inputs[2].state, d: this.state.components[i].inputs[3].state, e: this.state.components[i].inputs[4].state, f: this.state.components[i].inputs[5].state, g: this.state.components[i].inputs[6].state, h: this.state.components[i].inputs[7].state }}></SevenSegmentDisplay>);
       }
       else if (this.state.components[i].type === "pushbutton") {
-        components.push(<PushButton startWire={this.startWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
+        components.push(<PushButton onStateChange={this.changeComponentOutputState} startWire={this.startWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
       }
     }
 
     var wires = [];
     for (let i = 0; i < this.state.wires.length; i++) {
-      wires.push(<Wire start={this.state.wires[i].start} end={this.state.wires[i].end} key={this.state.wires[i].id} active={true} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
+      wires.push(<Wire onStateChange={this.changeComponentInputState} active={this.state.wires[i].active} start={this.state.wires[i].start} end={this.state.wires[i].end} key={this.state.wires[i].id} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
     }
 
     var new_component = []

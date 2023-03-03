@@ -90,6 +90,11 @@ class SevenSegmentDisplay extends React.Component {
         selected: this.props.selected
       });
     }
+    if (prevProps.segments !== this.props.segments) {
+      this.setState({
+        segments: this.props.segments
+      });
+    }
   }
 
   render() {
