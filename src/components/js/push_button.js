@@ -26,7 +26,7 @@ class PushButton extends React.Component {
 
         this.start_position = {x:0, y:0};
 
-        this.startWire = props.startWire;
+        this.StartEndWire = props.StartEndWire;
 
         this._dragStart = this._dragStart.bind(this);
         this._dragging = this._dragging.bind(this);
@@ -125,7 +125,7 @@ class PushButton extends React.Component {
                         <circle onMouseDown={this._buttonPress} onMouseUp={this._buttonRelease} cx="41.5" cy="40.5" r="37.5" fill={this.state.active?"#ea2828":"#531F21"} />
                         <circle cx="41.5" cy="40.5" r="35" stroke="black" strokeWidth="5" />
                     </g>
-                    <circle onMouseDown={(e) => {this.startWire(e,this.id, "pushbutton", 0)} } className="IO Out-0" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
+                    <circle onMouseDown={(e) => {this.StartEndWire(e,this.id, "pushbutton", 0, "output")} } className="IO Out-0" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
                 </g>
                 <defs>
                     <filter id="filter0_d_3_2" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">

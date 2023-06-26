@@ -32,8 +32,10 @@ class BreadBoard extends React.Component {
     this.addWirePoint = this.addWirePoint.bind(this);
     this.stopDrawingWire = this.stopDrawingWire.bind(this);
     this.endWire = this.endWire.bind(this);
+    this.startEndWire = this.startEndWire.bind(this);
     this.changeComponentOutputState = this.changeComponentOutputState.bind(this);
     this.changeComponentInputState = this.changeComponentInputState.bind(this);
+    this.deleteComponent = this.deleteComponent.bind(this);
   }
 
   componentDidMount() {
@@ -42,6 +44,9 @@ class BreadBoard extends React.Component {
       sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent("7segmentdisplay") });
       const pushbutton = document.getElementsByClassName("component_picker_item item-pushbutton")[0];
       pushbutton.addEventListener("click", (e) => { this.addNewComponent("pushbutton") });
+      const delete_button = document.getElementsByClassName("delete-btn")[0];
+      delete_button.addEventListener("click", (e) => { this.deleteComponent() });
+      document.onkeydown = this.deleteComponent;
       this.test = false;
     }
   }
@@ -54,12 +59,14 @@ class BreadBoard extends React.Component {
     this.setState({
       selectedComponentId: id
     });
+    document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
   }
 
   handleContainerClick = () => {
     this.setState({
       selectedComponentId: null
     });
+    document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
   }
 
   addComponent(name) {
@@ -67,11 +74,11 @@ class BreadBoard extends React.Component {
     var outputs = [];
     if (name === "7segmentdisplay") {
       for (let i = 0; i < 8; i++) {
-        inputs.push(Object.assign({}, { state: false, connection: null }));
+        inputs.push(Object.assign({}, { state: false, connections: [] }));
       }
     }
     else if (name === "pushbutton") {
-      outputs.push(Object.assign({}, { state: false, connection: null }));
+      outputs.push(Object.assign({}, { state: false, connections: [] }));
     }
     let id = this.getUniqueId();
     const new_component = { type: name, id: id, inputs: inputs, outputs: outputs };
@@ -100,6 +107,95 @@ class BreadBoard extends React.Component {
     });
   }
 
+  deleteWire(ids){
+    var wires = [...this.state.wires]
+    wires = wires.filter((wire, index1)=>{
+      if(ids.includes(wire.id)){
+          /*components = components.map((c, i)=>{
+            var index = -1;
+            if(c.id == wire.start.id){
+              index = wire.start.index;
+            } else if(c.id == wire.end.id){
+              index = wire.end.id;
+            }
+            if(index != -1){
+              c.inputs[index].connections = c.inputs[index].connections.filter((connection, ind, connections)=>{
+                if(connection.wireId == wire.id){
+                  connections.splice(ind, 1);
+                  return true;
+                }
+                return false;
+              });
+              c.outputs[index].connections = c.outputs[index].connections.filter((connection, ind, connections)=>{
+                if(connection.wireId == wire.id){
+                  connections.splice(ind, 1);
+                  return true;
+                }
+                return false;
+              });
+            }
+            if(c.inputs.length != 0){
+              var inputs = []
+              for(let i = 0; i < c.inputs.length; i++){
+                if(c.inputs[i].wireId != wire.id){
+                  inputs.push(c.inputs[i]);
+                  console.log(c.inputs[i].wireId, wire.id);
+                }
+              }
+              c.inputs = inputs;
+            }
+            if(c.outputs.length != 0){
+              var outputs = []
+              for(let i = 0; i < c.outputs.length; i++){
+                if(c.outputs[i].wireId != wire.id){
+                  outputs.push(c.outputs[i]);
+                }
+              }
+              c.outputs = outputs;
+            }
+            console.log(c);
+            return c;
+          });*/
+          return false;
+        }
+        return true;
+    });
+    this.setState({
+      wires: wires
+    });
+  }
+
+  deleteComponent(){
+    if(this.state.selectedComponentId != null){
+      this.deleteWire([this.state.selectedComponentId]);
+      var components = [...this.state.components];
+      var wires_to_delete = []
+      components.filter((value, index, arr)=>{
+        if(value.id == this.state.selectedComponentId){
+          for(let i = 0; i < value.inputs.length; i++){
+            for(let j = 0; j < value.inputs[i].connections.length; j++){
+              wires_to_delete.push(value.inputs[i].connections[j].wireId);
+            }
+          }
+          for(let i = 0; i < value.outputs.length; i++){
+            for(let j = 0; j < value.outputs[i].connections.length; j++){
+              wires_to_delete.push(value.outputs[i].connections[j].wireId);
+            }
+          }
+          this.deleteWire(wires_to_delete);
+          arr.splice(index, 1);
+          return true;
+        }
+        return false;
+      });
+      this.setState({
+        components: components,
+        selectedComponentId: null
+      });
+      document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
+    }
+  }
+
   setComponentCoord(id, x, y) {
     /*var wires = [];
     this.state.components.forEach(component =>{
@@ -124,9 +220,17 @@ class BreadBoard extends React.Component {
     this.components_coords.set(id, { x: x, y: y });
   }
 
-  startWire(e, id, type, index) {
+  startEndWire(e, id, type, index, IO){
+    if(this.state.drawingWire){
+      this.endWire(e, id, type, index, IO);
+    } else {
+      this.startWire(e, id, type, index, IO);
+    }
+  }
+
+  startWire(e, id, type, index, IO) {
     e.stopPropagation();
-    this.component_start_wire = {type: type, id: id, index: index};
+    this.component_start_wire = {type: type, id: id, index: index, IO: IO};
     var center = {
       x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.getBoundingClientRect().width / 2,
       y: e.currentTarget.getBoundingClientRect().top + e.currentTarget.getBoundingClientRect().height / 2
@@ -178,7 +282,7 @@ class BreadBoard extends React.Component {
     });
   }
 
-  endWire(e, id, type, index) {
+  endWire(e, id, type, index, IO) {
     if (this.state.drawingWire) {
       e.stopPropagation();
       document.removeEventListener("mousedown", this.addWirePoint, { capture: true });
@@ -194,13 +298,15 @@ class BreadBoard extends React.Component {
       points[points.length - 1].x = center.x;
       points[points.length - 1].y = center.y;
       this.wires_points.set(new_id, points);
+      var start = (this.component_start_wire.IO === "output" ? {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index} : {id: id, type: type, index:index});
+      var end = (IO === "input" ? {id: id, type: type, index:index} : {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index});
       this.setState({
         drawingWirePoints: [],
         drawingWire: false,
-        wires: [...this.state.wires, { id: new_id, start: {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index}, end: {id: id, type: type, index:index}, active: false}]
+        wires: [...this.state.wires, { id: new_id, start: start, end: end, active: false}]
       });
 
-      this.setConnection(this.component_start_wire, {type: type, id: id, index: index}, new_id);
+      this.setConnection(this.component_start_wire, {type: type, id: id, index: index, IO: IO}, new_id);
     }
   }
 
@@ -208,11 +314,19 @@ class BreadBoard extends React.Component {
     this.setState({
       components: this.state.components.map((c,i)=>{
         if(c.type === start.type && c.id === start.id){
-          c.outputs[start.index].connection = Object.assign({}, {type: end.type, id: end.id, wireId: wireId});
+          if(start.IO === "output"){
+            c.outputs[start.index].connections.push(Object.assign({}, {type: end.type, id: end.id, wireId: wireId}));
+          } else if(start.IO === "input"){
+            c.inputs[start.index].connections.push(Object.assign({}, {type: end.type, id: end.id, wireId: wireId}));
+          }
           return c;
         }
         else if(c.type === end.type && c.id === end.id){
-          c.inputs[end.index].connection = Object.assign({}, {type: start.type, id: start.id, wireId: wireId});
+          if(end.IO === "output"){
+            c.outputs[end.index].connections.push(Object.assign({}, {type: start.type, id: start.id, wireId: wireId}));
+          } else if(end.IO === "input"){
+            c.inputs[end.index].connections.push(Object.assign({}, {type: start.type, id: start.id, wireId: wireId}));
+          }
           return c;
         }
         else{
@@ -223,15 +337,17 @@ class BreadBoard extends React.Component {
   }
 
   changeComponentOutputState(id, state, index){
-    var wireId = null;
+    var wireIds = [];
     this.setState({
       components: this.state.components.map((c,i)=>{
         if(c.id == id){
           c.outputs.map((c,i)=>{
             if(i == index){
               c.state = state;
-              if(c.connection != null){
-                wireId = c.connection.wireId;
+              if(c.connections.length != 0){
+                wireIds = c.connections.map((c, i) => {
+                  return c.wireId;
+                });
               }
               return c
             }
@@ -245,10 +361,10 @@ class BreadBoard extends React.Component {
         }
       })
     });
-    if(wireId != null){
+    if(wireIds.length != 0){
       this.setState({
         wires: this.state.wires.map((c,i)=>{
-          if(c.id == wireId){
+          if(wireIds.includes(c.id)){
             c.active = state;
             return c;
           }
@@ -285,10 +401,10 @@ class BreadBoard extends React.Component {
     var components = []
     for (let i = 0; i < this.state.components.length; i++) {
       if (this.state.components[i].type === "7segmentdisplay") {
-        components.push(<SevenSegmentDisplay endWire={this.endWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state, c: this.state.components[i].inputs[2].state, d: this.state.components[i].inputs[3].state, e: this.state.components[i].inputs[4].state, f: this.state.components[i].inputs[5].state, g: this.state.components[i].inputs[6].state, h: this.state.components[i].inputs[7].state }}></SevenSegmentDisplay>);
+        components.push(<SevenSegmentDisplay StartEndWire={this.startEndWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state, c: this.state.components[i].inputs[2].state, d: this.state.components[i].inputs[3].state, e: this.state.components[i].inputs[4].state, f: this.state.components[i].inputs[5].state, g: this.state.components[i].inputs[6].state, h: this.state.components[i].inputs[7].state }}></SevenSegmentDisplay>);
       }
       else if (this.state.components[i].type === "pushbutton") {
-        components.push(<PushButton onStateChange={this.changeComponentOutputState} startWire={this.startWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
+        components.push(<PushButton onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
       }
     }
 
@@ -316,7 +432,6 @@ class BreadBoard extends React.Component {
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
           <g>
             {components}
-            <SevenSegmentDisplay id={1} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === 1} x="350" y="150" segments={{ a: true, b: true, c: true, d: true, e: false, f: false, g: true, h: true }}></SevenSegmentDisplay>
             {new_component}
             {drawingWire}
             {wires}

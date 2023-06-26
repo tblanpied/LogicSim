@@ -22,7 +22,7 @@ class SevenSegmentDisplay extends React.Component {
     this.onClick = props.onClick;
     this.id = props.id;
     this.setCoord = props.setCoord;
-    this.endWire = props.endWire;
+    this.StartEndWire = props.StartEndWire;
 
     this.start_position = { x: 0, y: 0 };
 
@@ -187,7 +187,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#7D7D7D"
             stroke="black"
           />
-          <g className="IO In-7" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 7)} }>
+          <g className="IO In-7" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 7, "input")} }>
           <g className="left-bottom">
             <mask id="path-10-inside-1_28_439" fill="white">
               <path
@@ -252,7 +252,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-6" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 6)} }>
+        <g className="IO In-6" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 6, "input")} }>
           <g className="left-bottom">
             <mask id="path-19-inside-5_28_439" fill="white">
               <path
@@ -317,7 +317,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-5" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 5)} }>
+        <g className="IO In-5" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 5, "input")} }>
           <g className="left-bottom">
             <mask id="path-28-inside-9_28_439" fill="white">
               <path
@@ -382,7 +382,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-4" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 4)} }>
+        <g className="IO In-4" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 4, "input")} }>
           <g className="left-bottom">
             <mask id="path-37-inside-13_28_439" fill="white">
               <path
@@ -447,7 +447,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-3" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 3)} }>
+        <g className="IO In-3" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 3, "input")} }>
           <g className="left-bottom">
             <mask id="path-46-inside-17_28_439" fill="white">
               <path
@@ -512,7 +512,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-2" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 2)} }>
+        <g className="IO In-2" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 2, "input")} }>
           <g className="left-bottom">
             <mask id="path-55-inside-21_28_439" fill="white">
               <path
@@ -577,7 +577,7 @@ class SevenSegmentDisplay extends React.Component {
             fill="#191919"
           />
         </g>
-        <g className="IO In-1" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 1)} }>
+        <g className="IO In-1" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 1, "input")} }>
           <g className="left-bottom">
             <mask id="path-64-inside-25_28_439" fill="white">
               <path
@@ -636,7 +636,7 @@ class SevenSegmentDisplay extends React.Component {
           </g>
           <circle className="center" cx="20.5" cy="95.5" r="5" fill="#191919" />
         </g>
-        <g className="IO In-0" onMouseDown={(e) => {this.endWire(e, this.id, "7segmentdisplay", 0)} }>
+        <g className="IO In-0" onMouseDown={(e) => {this.StartEndWire(e, this.id, "7segmentdisplay", 0, "input")} }>
           <g className="left-bottom">
             <mask id="path-73-inside-29_28_439" fill="white">
               <path

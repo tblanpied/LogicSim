@@ -29,7 +29,7 @@ class ToolBar extends React.Component{
                 <Redo className="toolbar-icon toolbar_borderright"></Redo>
                 <Copy className="toolbar-icon"></Copy>
                 <Paste className="toolbar-icon"></Paste>
-                <Delete className="toolbar-icon"></Delete>
+                <Delete className="toolbar-icon delete-btn"></Delete>
                 <RotateLeft className="toolbar-icon toolbar_borderleft"></RotateLeft>
                 <RotateRight className="toolbar-icon toolbar_borderright"></RotateRight>
                 <FlipHorizontal className="toolbar-icon"></FlipHorizontal>
