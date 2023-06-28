@@ -1,0 +1,8 @@
+
+.NotGate .IO{
+    opacity: 0;
+}
+
+.NotGate .IO:hover{
+    opacity: 100;
+}

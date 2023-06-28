@@ -4,6 +4,7 @@ import SevenSegmentDisplay from "../../components/js/seven_segment_display";
 import Wire from "../../components/js/wire";
 import PushButton from "../../components/js/push_button";
 import AndGate from "../../components/js/and_gate";
+import NotGate from "../../components/js/not_gate";
 
 class BreadBoard extends React.Component {
   constructor(props) {
@@ -48,6 +49,8 @@ class BreadBoard extends React.Component {
       pushbutton.addEventListener("click", (e) => { this.addNewComponent("pushbutton") });
       const andgate = document.getElementsByClassName("component_picker_item item-ANDgate")[0];
       andgate.addEventListener("click", (e) => { this.addNewComponent("andgate") });
+      const notgate = document.getElementsByClassName("component_picker_item item-NOTgate")[0];
+      notgate.addEventListener("click", (e) => { this.addNewComponent("notgate") });
       const delete_button = document.getElementsByClassName("delete-btn")[0];
       delete_button.addEventListener("click", (e) => { this.deleteComponent() });
       document.onkeydown = this.deleteComponent;
@@ -101,7 +104,10 @@ class BreadBoard extends React.Component {
       outputs.push(Object.assign({}, { state: false, connections: [] }));
       inputs.push(Object.assign({}, { state: false, connections: [] }));
       inputs.push(Object.assign({}, { state: false, connections: [] }));
-    }
+    } else if (name === "notgate") {
+      outputs.push(Object.assign({}, { state: false, connections: [] }));
+      inputs.push(Object.assign({}, { state: false, connections: [] }));
+    } 
     let id = this.getUniqueId();
     const new_component = { type: name, id: id, inputs: inputs, outputs: outputs };
     this.setState(prevState => ({
@@ -133,6 +139,7 @@ class BreadBoard extends React.Component {
     var wires = [...this.state.wires]
     wires = wires.filter((wire, index1)=>{
       if(ids.includes(wire.id)){
+        this.changeComponentInputState(wire.end.id, false, wire.end.index);
           /*components = components.map((c, i)=>{
             var index = -1;
             if(c.id == wire.start.id){
@@ -322,13 +329,32 @@ class BreadBoard extends React.Component {
       this.wires_points.set(new_id, points);
       var start = (this.component_start_wire.IO === "output" ? {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index} : {id: id, type: type, index:index});
       var end = (IO === "input" ? {id: id, type: type, index:index} : {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index});
+
+      this.setConnection(this.component_start_wire, {type: type, id: id, index: index, IO: IO}, new_id);
+
+      var wire_state = false;
+      this.state.components.map((c,i)=>{
+        if(c.id == start.id){
+          c.outputs.map((c,i)=>{
+            if(i == start.index){
+              wire_state = c.state;
+              return c
+            }
+            else{
+              return c
+            }
+          });
+          return c;
+        }else{  
+          return c;
+        }
+      });
       this.setState({
         drawingWirePoints: [],
         drawingWire: false,
-        wires: [...this.state.wires, { id: new_id, start: start, end: end, active: false}]
+        wires: [...this.state.wires, { id: new_id, start: start, end: end, active: wire_state}]
       });
-
-      this.setConnection(this.component_start_wire, {type: type, id: id, index: index, IO: IO}, new_id);
+      this.changeComponentInputState(end.id, wire_state, end.index);
     }
   }
 
@@ -429,6 +455,8 @@ class BreadBoard extends React.Component {
         components.push(<PushButton onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
       } else if(this.state.components[i].type === "andgate"){
         components.push(<AndGate onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} inputs={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state}}></AndGate>);
+      } else if(this.state.components[i].type === "notgate"){
+        components.push(<NotGate onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} input={this.state.components[i].inputs[0].state}></NotGate>);
       }
     }
 
@@ -446,6 +474,8 @@ class BreadBoard extends React.Component {
         new_component.push(<PushButton opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("pushbutton") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y}></PushButton>);
       } else if (this.state.new_component.type === "andgate") {
         new_component.push(<AndGate opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("andgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} inputs={{a:false, b:false}}></AndGate>);
+      } else if (this.state.new_component.type === "notgate") {
+        new_component.push(<NotGate opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("notgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} input={false}></NotGate>);
       }
     }
 

@@ -13,7 +13,7 @@ class ComponentPicker extends React.Component{
                 <ComponentPickerItem name="7 segment display" icon="/icons/icon-7segmentdisplay.png"></ComponentPickerItem>
                 <ComponentPickerItem name="push button" icon="/icons/icon-PushButton.png"></ComponentPickerItem>
                 <ComponentPickerItem name="AND gate" icon="/icons/icon-AndGate.png"></ComponentPickerItem>
-                <ComponentPickerItem ></ComponentPickerItem>
+                <ComponentPickerItem name="NOT gate" icon="/icons/icon-NotGate.png"></ComponentPickerItem>
                 <ComponentPickerItem ></ComponentPickerItem>
                 <ComponentPickerItem ></ComponentPickerItem>
                 <ComponentPickerItem ></ComponentPickerItem>
