@@ -1,0 +1,8 @@
+
+.AndGate .IO{
+    opacity: 0;
+}
+
+.AndGate .IO:hover{
+    opacity: 100;
+}

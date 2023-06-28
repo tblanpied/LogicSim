@@ -3,6 +3,7 @@ import React from "react";
 import SevenSegmentDisplay from "../../components/js/seven_segment_display";
 import Wire from "../../components/js/wire";
 import PushButton from "../../components/js/push_button";
+import AndGate from "../../components/js/and_gate";
 
 class BreadBoard extends React.Component {
   constructor(props) {
@@ -14,7 +15,8 @@ class BreadBoard extends React.Component {
       wires: [],
       new_component: null,
       drawingWire: false,
-      drawingWirePoints: []
+      drawingWirePoints: [],
+      zoom: 1.0
     }
     this.component_start_wire = null;
     this.components_coords = new Map();
@@ -44,10 +46,26 @@ class BreadBoard extends React.Component {
       sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent("7segmentdisplay") });
       const pushbutton = document.getElementsByClassName("component_picker_item item-pushbutton")[0];
       pushbutton.addEventListener("click", (e) => { this.addNewComponent("pushbutton") });
+      const andgate = document.getElementsByClassName("component_picker_item item-ANDgate")[0];
+      andgate.addEventListener("click", (e) => { this.addNewComponent("andgate") });
       const delete_button = document.getElementsByClassName("delete-btn")[0];
       delete_button.addEventListener("click", (e) => { this.deleteComponent() });
       document.onkeydown = this.deleteComponent;
+      const breadboard = document.getElementsByClassName("breadboard")[0];
+      breadboard.addEventListener("wheel", (e) => { this.zoom(e.wheelDelta) });
       this.test = false;
+    }
+  }
+
+  zoom(delta){
+    if(delta > 0){
+      this.setState({
+        zoom: this.state.zoom * 1.05
+      });
+    } else {
+      this.setState({
+        zoom: this.state.zoom * 0.95
+      });
     }
   }
 
@@ -79,6 +97,10 @@ class BreadBoard extends React.Component {
     }
     else if (name === "pushbutton") {
       outputs.push(Object.assign({}, { state: false, connections: [] }));
+    } else if (name === "andgate") {
+      outputs.push(Object.assign({}, { state: false, connections: [] }));
+      inputs.push(Object.assign({}, { state: false, connections: [] }));
+      inputs.push(Object.assign({}, { state: false, connections: [] }));
     }
     let id = this.getUniqueId();
     const new_component = { type: name, id: id, inputs: inputs, outputs: outputs };
@@ -405,6 +427,8 @@ class BreadBoard extends React.Component {
       }
       else if (this.state.components[i].type === "pushbutton") {
         components.push(<PushButton onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
+      } else if(this.state.components[i].type === "andgate"){
+        components.push(<AndGate onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} inputs={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state}}></AndGate>);
       }
     }
 
@@ -420,6 +444,8 @@ class BreadBoard extends React.Component {
       }
       else if (this.state.new_component.type === "pushbutton") {
         new_component.push(<PushButton opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("pushbutton") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y}></PushButton>);
+      } else if (this.state.new_component.type === "andgate") {
+        new_component.push(<AndGate opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("andgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} inputs={{a:false, b:false}}></AndGate>);
       }
     }
 
@@ -430,7 +456,7 @@ class BreadBoard extends React.Component {
     return (
       <div className="breadboard" onMouseDown={this.handleContainerClick}>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <g>
+          <g style={{transform: "scale(" + this.state.zoom + ")"}}>
             {components}
             {new_component}
             {drawingWire}
