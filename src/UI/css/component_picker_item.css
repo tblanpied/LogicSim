@@ -13,6 +13,7 @@
 
 #light .component_picker_item:hover{
     box-shadow: 0px 0px 5px 1px #1f77eb69;
+    background-color: #ffffff;
 }
 
 #light .component_picker_item:hover .component_picker_item_name{
@@ -25,6 +26,7 @@
 
 #dark .component_picker_item:hover{
     box-shadow: 0px 0px 5px 1px #00aeff69;
+    background-color: #393939;
 }
 
 #dark .component_picker_item:hover .component_picker_item_name{
