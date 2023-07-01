@@ -13,7 +13,7 @@ class ComponentPickerItem extends React.Component{
         return(
             <div className={"component_picker_item item-" + this.name.replace(/\s+/g, '')}>
                 <div className="component_picker_item_icon">
-                    <img src={this.icon}></img>
+                    <img draggable="false" src={this.icon}></img>
                 </div>
                 <div className="component_picker_item_name">
                     {this.name}

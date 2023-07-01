@@ -1,134 +1,148 @@
 import "../css/not_gate.css";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-class NotGate extends React.Component {
-    constructor(props) {
-        super(props);
+const NotGate = React.memo((props) => {
+    const [state, setState] = useState({
+      new_component: props.new_component === undefined ? false : props.new_component,
+      dragging: props.dragging !== undefined ? props.dragging : false,
+      position: {
+        x: parseInt(props.x),
+        y: parseInt(props.y),
+      },
+      diffX: 97 * props.zoom,
+      diffY: 75 * props.zoom,
+      selected: props.selected,
+      opacity: props.opacity === undefined ? 1 : props.opacity,
+      rotation: props.rotation === undefined ? 0 : props.rotation,
+      input: props.input,
+      zoom: props.zoom,
+      offset: props.offset
+    });
+    const [outputState, setOutputState] = useState(true);
+  
+    const onClick = props.onClick;
+    const setCoord = props.setCoord;
+    const onStateChange = props.onStateChange;
+    const id = props.id;
+    const start_position = { x: 0, y: 0 };
+    const StartEndWire = props.StartEndWire;
 
-        this.state = {
-            new_component: props.new_component === undefined ? false : props.new_component,
-            dragging: false,
-            position: {
-                x: parseInt(props.x),
-                y: parseInt(props.y)
-            },
-            diffX: 0,
-            diffY: 0,
-            selected: props.selected,
-            opacity: props.opacity === undefined ? 1 : props.opacity,
-            rotation: (props.rotation === undefined ? 0 : props.rotation),
-            input: props.input
-        };
-        this.output_state = true;
-        this.onClick = props.onClick;
-        this.setCoord = props.setCoord;
-        this.onStateChange = props.onStateChange;
-        this.id = props.id;
-
-        this.start_position = {x:0, y:0};
-
-        this.StartEndWire = props.StartEndWire;
-
-        this._dragStart = this._dragStart.bind(this);
-        this._dragging = this._dragging.bind(this);
-        this._dragEnd = this._dragEnd.bind(this);
-    }
-
-    componentDidMount() {
-        this.onStateChange(this.id, !this.state.input, 0);
-        if (this.state.new_component) {
-            this.setState({
-                diffX: 103,
-                diffY: 94,
-                dragging: true
-            });
-            document.addEventListener("mousemove", this._dragging);
-            document.addEventListener("mouseup", this._dragEnd);
+    const stateRef = useRef(state);
+    stateRef.current = state;
+  
+    const dragStart = (e) => {
+      e.stopPropagation();
+      if (e.button === 0) {
+        if(state.new_component){
+          setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
         }
-    }
-
-    _dragStart(e) {
-        e.stopPropagation();
-        if (e.button === 0) {
-            this.onClick(this.id)
-            if (!this.state.new_component) {
-                this.start_position.x = e.pageX;
-                this.start_position.y = e.pageY;
-                this.setState({
-                    diffX: e.pageX - e.currentTarget.getBoundingClientRect().left,
-                    diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
-                    dragging: true,
-                });
-                document.addEventListener("mousemove", this._dragging);
-                document.addEventListener("mouseup", this._dragEnd);
-            }
+        onClick(id);
+        if (!state.new_component) {
+          start_position.x = e.pageX;
+          start_position.y = e.pageY;
+          const rect = e.currentTarget.getBoundingClientRect();
+          setState((prevState) => ({
+            ...prevState,
+            diffX: e.pageX - rect.left,
+            diffY: e.pageY - rect.top,
+            dragging: true
+          }));
+          document.addEventListener("mousemove", dragging);
+          document.addEventListener("mouseup", dragEnd);
         }
-    }
-
-    _dragging(e) {
-        if (this.state.dragging && (this.start_position.x !== e.pageX || this.start_position.y !== e.pageY)) {
-            this.setState({
-                position: {
-                    x: e.pageX - this.state.diffX,
-                    y: e.pageY - this.state.diffY
-                }
-            });
-            this.setCoord(this.id, e.pageX - this.state.diffX, e.pageY - this.state.diffY);
+      }
+    };
+  
+    const dragging = (e) => {
+      e.stopPropagation();
+      if (stateRef.current.dragging && (start_position.x !== e.pageX || start_position.y !== e.pageY)) {
+        setState((prevState) => ({
+          ...prevState,
+          position: {
+            x: ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom),
+            y: ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom),
+          },
+        }));
+      }
+    };
+  
+    const dragEnd = (e) => {
+      e.stopPropagation();
+      if (!stateRef.current.new_component) {
+        setState((prevState) => ({
+          ...prevState,
+          dragging: false,
+        }));
+        setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
+        document.removeEventListener("mousemove", dragging);
+        document.removeEventListener("mouseup", dragEnd);
+      }
+    };
+  
+    useEffect(() => {
+      onStateChange(id, !state.input, 0);
+      if (state.new_component) {
+        document.addEventListener("mousemove", dragging);
+        document.addEventListener("mouseup", dragEnd);
+        return () => {
+            document.removeEventListener('mousemove', dragging);
+            document.removeEventListener('mouseup', dragEnd);
         }
-    }
-
-    _dragEnd() {
-        if (!this.state.new_component) {
-            this.setState({
-                diffX: 0,
-                diffY: 0,
-                dragging: false,
-            });
-            document.removeEventListener("mousemove", this._dragging);
-            document.removeEventListener("mouseup", this._dragEnd);
+      }
+    }, []);
+  
+    useEffect(() => {
+      if (props.selected !== state.selected) {
+        setState((prevState) => ({
+          ...prevState,
+          selected: props.selected,
+        }));
+      }
+      if (props.input !== state.input) {
+        setState((prevState) => ({
+          ...prevState,
+          input: props.input,
+        }));
+        if (!props.input !== outputState) {
+          setOutputState(!props.input);
+          onStateChange(id, !props.input, 0);
         }
-    }
-
-    componentDidUpdate(prevProps) {
-        if (prevProps.selected !== this.props.selected) {
-            this.setState({
-                selected: this.props.selected
-            });
-        }
-        if(prevProps.input != this.props.input){
-            this.setState({
-                inputs: this.props.inputs
-            });
-            if((!this.props.input) != this.output_state){
-                this.output_state = (!this.props.input);
-                this.onStateChange(this.id, this.output_state, 0);
-            }
-        }
-    }
-
-    render() {
-        return (
-            <g opacity={this.state.opacity} onMouseDown={this._dragStart} onMouseMove={this._dragging} onMouseUp={this._dragEnd} className={"Component-notgate-" + this.id} transform={"translate(" + this.state.position.x + "," + this.state.position.y + ") rotate(" + this.state.rotation + ")"} width="206" height="187" viewBox="0 0 206 187" fill="none">
+      }
+      if(props.zoom != state.zoom){
+        setState((prevState) => ({
+          ...prevState,
+          zoom: props.zoom
+        }));
+      }
+      if(props.offset != state.offset){
+        setState((prevState) => ({
+          ...prevState,
+          offset: props.offset
+        }));
+      }
+    }, [props.selected, props.input, props.zoom, props.offset]);
+  
+    return (
+            <g opacity={state.opacity} onMouseDown={dragStart} className={"Component-notgate-" + id} transform={"translate(" + state.position.x + "," + state.position.y + ") rotate(" + state.rotation + ")"} width="198" height="152" viewBox="0 0 198 152" fill="none">
                 <g className="NotGate">
-                    <g opacity={this.state.selected?1:0} className="select-border">
-                        <path className="Polygon 2" d="M175 86.5718C180.333 89.651 180.333 97.349 175 100.428L58.75 167.545C53.4167 170.624 46.75 166.775 46.75 160.617L46.75 26.383C46.75 20.2246 53.4167 16.3756 58.75 19.4548L175 86.5718Z" fill="#0A9DFF"/>
-                        <rect className="Rectangle 3" x="25" y="86" width="35" height="15" fill="#0A9DFF"/>
-                        <rect className="Rectangle 4" x="161" y="86" width="35" height="15" fill="#0A9DFF"/>
-                        <circle className="Ellipse 3" cx="25.5" cy="93.5" r="7.5" fill="#0A9DFF"/>
-                        <circle className="Ellipse 4" cx="196.5" cy="93.5" r="7.5" fill="#0A9DFF"/>
-                    </g>
-                    <rect className="Rectangle 1" x="161" y="89" width="35" height="9" fill="black"/>
-                    <circle className="Ellipse 1" cx="196.5" cy="93.5" r="4.5" fill="black"/>
-                    <rect className="Rectangle 2" x="25" y="89" width="35" height="9" fill="black"/>
-                    <circle className="Ellipse 2" cx="25.5" cy="93.5" r="4.5" fill="black"/>
-                    <path className="Polygon 1" d="M172.25 95.6651L56 162.782C54.3333 163.744 52.25 162.541 52.25 160.617L52.25 26.383C52.25 24.4585 54.3333 23.2557 56 24.218L172.25 91.335C173.917 92.2972 173.917 94.7028 172.25 95.6651Z" fill="#9218F1" stroke="black" strokeWidth="5"/>
-                    <path className="NOT" d="M89.136 104.296C89.136 104.744 88.1333 104.968 86.128 104.968C84.1227 104.968 83.0347 104.808 82.864 104.488L77.52 94.504V104.456C77.52 104.84 76.528 105.032 74.544 105.032C72.5813 105.032 71.6 104.84 71.6 104.456V83.048C71.6 82.728 72.4427 82.568 74.128 82.568C74.7893 82.568 75.5573 82.632 76.432 82.76C77.328 82.8667 77.872 83.08 78.064 83.4L83.184 93.256V83.208C83.184 82.8027 84.176 82.6 86.16 82.6C88.144 82.6 89.136 82.8027 89.136 83.208V104.296ZM101.854 105.32C98.8673 105.32 96.4247 104.339 94.526 102.376C92.6487 100.413 91.71 97.5547 91.71 93.8C91.71 90.024 92.6593 87.1653 94.558 85.224C96.478 83.2827 98.942 82.312 101.95 82.312C104.979 82.312 107.422 83.272 109.278 85.192C111.134 87.0907 112.062 89.9813 112.062 93.864C112.062 97.7253 111.113 100.605 109.214 102.504C107.315 104.381 104.862 105.32 101.854 105.32ZM101.886 88.456C100.862 88.456 99.998 88.9253 99.294 89.864C98.6113 90.8027 98.27 92.1253 98.27 93.832C98.27 95.5173 98.6007 96.8187 99.262 97.736C99.9233 98.632 100.787 99.08 101.854 99.08C102.942 99.08 103.817 98.6213 104.478 97.704C105.161 96.7867 105.502 95.4747 105.502 93.768C105.502 92.0613 105.15 90.7493 104.446 89.832C103.763 88.9147 102.91 88.456 101.886 88.456ZM124.263 104.488C124.263 104.915 123.207 105.128 121.095 105.128C118.983 105.128 117.927 104.915 117.927 104.488V88.424H114.087C113.725 88.424 113.469 87.9333 113.319 86.952C113.255 86.4827 113.223 86.0027 113.223 85.512C113.223 85.0213 113.255 84.5413 113.319 84.072C113.469 83.0907 113.725 82.6 114.087 82.6H128.007C128.37 82.6 128.626 83.0907 128.775 84.072C128.839 84.5413 128.871 85.0213 128.871 85.512C128.871 86.0027 128.839 86.4827 128.775 86.952C128.626 87.9333 128.37 88.424 128.007 88.424H124.263V104.488Z" fill="black"/>
-                    <circle onMouseDown={(e) => {this.StartEndWire(e,this.id, "notgate", 0, "output")} } className="IO Out-0" cx="196.5" cy="93.5" r="9" fill="#FF0000" stroke="black" strokeWidth="4"/>
-                    <circle onMouseDown={(e) => {this.StartEndWire(e,this.id, "notgate", 0, "input")} } className="IO In-0" cx="25.5" cy="93.5" r="9" fill="#FF0000" stroke="black" strokeWidth="4"/>
+                  <g opacity={state.selected?1:0} className="select-border">
+                    <path className="Polygon 2" d="M163 69.5718C168.333 72.651 168.333 80.349 163 83.4282L46.75 150.545C41.4167 153.624 34.75 149.775 34.75 143.617L34.75 9.38303C34.75 3.22463 41.4167 -0.624376 46.75 2.45483L163 69.5718Z" fill="#0A9DFF"/>
+                    <rect className="Rectangle 3" x="12.9999" y="69" width="35" height="15" fill="#0A9DFF"/>
+                    <rect className="Rectangle 4" x="149" y="69" width="35" height="15" fill="#0A9DFF"/>
+                    <circle className="Ellipse 3" cx="13.4999" cy="76.5" r="7.5" fill="#0A9DFF"/>
+                    <circle className="Ellipse 4" cx="184.5" cy="76.5" r="7.5" fill="#0A9DFF"/>
+                  </g>
+                  <rect className="Rectangle 7" x="149" y="72" width="35" height="9" fill="black"/>
+                  <circle className="Ellipse 7" cx="184.5" cy="76.5" r="4.5" fill="black"/>
+                  <rect className="Rectangle 8" x="12.9999" y="72" width="35" height="9" fill="black"/>
+                  <circle className="Ellipse 8" cx="13.4999" cy="76.5" r="4.5" fill="black"/>
+                  <path className="Polygon 4" d="M160.25 78.6651L44 145.782C42.3333 146.744 40.25 145.541 40.25 143.617L40.25 9.38303C40.25 7.45853 42.3334 6.25571 44 7.21796L160.25 74.3349C161.917 75.2972 161.917 77.7028 160.25 78.6651Z" fill="#9218F1" stroke="black" strokeWidth="5"/>
+                  <path className="NOT" d="M77.1359 87.296C77.1359 87.744 76.1332 87.968 74.1279 87.968C72.1225 87.968 71.0345 87.808 70.8639 87.488L65.5199 77.504V87.456C65.5199 87.84 64.5279 88.032 62.5439 88.032C60.5812 88.032 59.5999 87.84 59.5999 87.456V66.048C59.5999 65.728 60.4425 65.568 62.1279 65.568C62.7892 65.568 63.5572 65.632 64.4319 65.76C65.3279 65.8667 65.8719 66.08 66.0639 66.4L71.1839 76.256V66.208C71.1839 65.8027 72.1759 65.6 74.1599 65.6C76.1439 65.6 77.1359 65.8027 77.1359 66.208V87.296ZM89.8539 88.32C86.8672 88.32 84.4245 87.3387 82.5259 85.376C80.6485 83.4133 79.7099 80.5547 79.7099 76.8C79.7099 73.024 80.6592 70.1653 82.5579 68.224C84.4779 66.2827 86.9419 65.312 89.9499 65.312C92.9792 65.312 95.4219 66.272 97.2779 68.192C99.1339 70.0907 100.062 72.9813 100.062 76.864C100.062 80.7253 99.1125 83.6053 97.2139 85.504C95.3152 87.3813 92.8619 88.32 89.8539 88.32ZM89.8859 71.456C88.8619 71.456 87.9979 71.9253 87.2939 72.864C86.6112 73.8027 86.2699 75.1253 86.2699 76.832C86.2699 78.5173 86.6005 79.8187 87.2619 80.736C87.9232 81.632 88.7872 82.08 89.8539 82.08C90.9419 82.08 91.8165 81.6213 92.4779 80.704C93.1605 79.7867 93.5019 78.4747 93.5019 76.768C93.5019 75.0613 93.1499 73.7493 92.4459 72.832C91.7632 71.9147 90.9099 71.456 89.8859 71.456ZM112.263 87.488C112.263 87.9147 111.207 88.128 109.095 88.128C106.983 88.128 105.927 87.9147 105.927 87.488V71.424H102.087C101.724 71.424 101.468 70.9333 101.319 69.952C101.255 69.4827 101.223 69.0027 101.223 68.512C101.223 68.0213 101.255 67.5413 101.319 67.072C101.468 66.0907 101.724 65.6 102.087 65.6H116.007C116.37 65.6 116.626 66.0907 116.775 67.072C116.839 67.5413 116.871 68.0213 116.871 68.512C116.871 69.0027 116.839 69.4827 116.775 69.952C116.626 70.9333 116.37 71.424 116.007 71.424H112.263V87.488Z" fill="black"/>
+                  <circle onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "output")} } className="IO Out-0" cx="184.5" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
+                  <circle onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "input")} } className="IO In-0" cx="13.4999" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
                 </g>
             </g>
-        );
-    }
-}
+    );
+});
 
 export default NotGate;

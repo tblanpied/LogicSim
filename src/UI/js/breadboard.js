@@ -17,13 +17,17 @@ class BreadBoard extends React.Component {
       new_component: null,
       drawingWire: false,
       drawingWirePoints: [],
-      zoom: 1.0
+      zoom: 1.0,
+      offset: {x:0, y:0},
+      dragging: false
     }
     this.component_start_wire = null;
     this.components_coords = new Map();
     this.wires_points = new Map();
     this.id = 2;
     this.test = true;
+    this.dragging_start_pos = {x:0, y: 0};
+    this.dragging_start_offset = {x:0, y: 0};
 
 
     this.handleComponentClick = this.handleComponentClick.bind(this);
@@ -39,6 +43,9 @@ class BreadBoard extends React.Component {
     this.changeComponentOutputState = this.changeComponentOutputState.bind(this);
     this.changeComponentInputState = this.changeComponentInputState.bind(this);
     this.deleteComponent = this.deleteComponent.bind(this);
+    this.updateWirePoint = this.updateWirePoint.bind(this);
+    this.dragging = this.dragging.bind(this);
+    this.dragEnd = this.dragEnd.bind(this);
   }
 
   componentDidMount() {
@@ -55,19 +62,43 @@ class BreadBoard extends React.Component {
       delete_button.addEventListener("click", (e) => { this.deleteComponent() });
       document.onkeydown = this.deleteComponent;
       const breadboard = document.getElementsByClassName("breadboard")[0];
-      breadboard.addEventListener("wheel", (e) => { this.zoom(e.wheelDelta) });
+      breadboard.addEventListener("wheel", (e) => { this.zoom(e, e.wheelDelta) });
       this.test = false;
     }
   }
 
-  zoom(delta){
-    if(delta > 0){
+  dragging(e){
+    if(this.state.dragging && !this.state.drawingWire){
       this.setState({
-        zoom: this.state.zoom * 1.05
+        offset: {x: this.dragging_start_offset.x - (this.dragging_start_pos.x - e.pageX), y: this.dragging_start_offset.y - (this.dragging_start_pos.y - e.pageY)}
+      });
+    }
+  }
+
+  dragEnd(e){
+    this.setState({
+      dragging: false
+    });
+  }
+
+  zoom(e, delta){
+    if(delta > 0){
+      const cursorX = (e.pageX - this.state.offset.x) / this.state.zoom;
+      const cursorY = (e.pageY - this.state.offset.y) / this.state.zoom;
+      const translateX = e.pageX - cursorX * ( this.state.zoom * 1.05);
+      const translateY = e.pageY - cursorY * ( this.state.zoom * 1.05);
+      this.setState({
+        zoom: this.state.zoom * 1.05,
+        offset: {x: translateX, y: translateY}
       });
     } else {
+      const cursorX = (e.pageX - this.state.offset.x) / this.state.zoom;
+      const cursorY = (e.pageY - this.state.offset.y) / this.state.zoom;
+      const translateX = e.pageX - cursorX * ( this.state.zoom * 0.95);
+      const translateY = e.pageY - cursorY * ( this.state.zoom * 0.95);
       this.setState({
-        zoom: this.state.zoom * 0.95
+        zoom: this.state.zoom * 0.95,
+        offset: {x: translateX, y: translateY}
       });
     }
   }
@@ -83,11 +114,18 @@ class BreadBoard extends React.Component {
     document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
   }
 
-  handleContainerClick = () => {
+  handleContainerClick = (e) => {
     this.setState({
       selectedComponentId: null
     });
     document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
+    this.dragging_start_pos.x = e.pageX;
+    this.dragging_start_pos.y = e.pageY;
+    this.dragging_start_offset.x = this.state.offset.x;
+    this.dragging_start_offset.y = this.state.offset.y;
+    this.setState({
+      dragging: true
+    });
   }
 
   addComponent(name) {
@@ -261,8 +299,8 @@ class BreadBoard extends React.Component {
     e.stopPropagation();
     this.component_start_wire = {type: type, id: id, index: index, IO: IO};
     var center = {
-      x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.getBoundingClientRect().width / 2,
-      y: e.currentTarget.getBoundingClientRect().top + e.currentTarget.getBoundingClientRect().height / 2
+      x: (e.currentTarget.getBoundingClientRect().left + (e.currentTarget.getBoundingClientRect().width / 2) - this.state.offset.x) / this.state.zoom,
+      y: (e.currentTarget.getBoundingClientRect().top + (e.currentTarget.getBoundingClientRect().height / 2) - this.state.offset.y) / this.state.zoom
     };
     this.setState({
       drawingWire: true,
@@ -278,8 +316,8 @@ class BreadBoard extends React.Component {
     this.setState({
       drawingWirePoints: this.state.drawingWirePoints.map((c, i) => {
         if (i === this.state.drawingWirePoints.length - 1) {
-          c.x = e.pageX;
-          c.y = e.pageY;
+          c.x = (e.pageX - this.state.offset.x) / this.state.zoom;
+          c.y = (e.pageY - this.state.offset.y) / this.state.zoom;
           return c;
         }
         else {
@@ -294,7 +332,7 @@ class BreadBoard extends React.Component {
     //e.stopPropagation();
     if (e.button === 0) {
       this.setState({
-        drawingWirePoints: [...this.state.drawingWirePoints, { x: e.pageX, y: e.pageY }]
+        drawingWirePoints: [...this.state.drawingWirePoints, { x: (e.pageX - this.state.offset.x) / this.state.zoom, y: (e.pageY - this.state.offset.y) / this.state.zoom }]
       });
     }
     //console.log(this.state.drawingWirePoints);
@@ -318,17 +356,20 @@ class BreadBoard extends React.Component {
       document.removeEventListener("mousemove", this.drawWire);
       document.removeEventListener("contextmenu", this.stopDrawingWire);
       var center = {
-        x: e.currentTarget.getBoundingClientRect().left + e.currentTarget.getBoundingClientRect().width / 2,
-        y: e.currentTarget.getBoundingClientRect().top + e.currentTarget.getBoundingClientRect().height / 2
+        x: (e.currentTarget.getBoundingClientRect().left + (e.currentTarget.getBoundingClientRect().width / 2) - this.state.offset.x) / this.state.zoom,
+        y: (e.currentTarget.getBoundingClientRect().top + (e.currentTarget.getBoundingClientRect().height / 2) - this.state.offset.y) / this.state.zoom
       };
       var new_id = this.getUniqueId();
       var points = [...this.state.drawingWirePoints]
       points.pop();
       points[points.length - 1].x = center.x;
       points[points.length - 1].y = center.y;
+      if(IO === "output"){
+        points = points.reverse();
+      }
       this.wires_points.set(new_id, points);
-      var start = (this.component_start_wire.IO === "output" ? {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index} : {id: id, type: type, index:index});
-      var end = (IO === "input" ? {id: id, type: type, index:index} : {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index});
+      var start = (this.component_start_wire.IO === "output" ? {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index, IO: this.component_start_wire.IO} : {id: id, type: type, index:index, IO: IO});
+      var end = (IO === "input" ? {id: id, type: type, index:index, IO: IO} : {id: this.component_start_wire.id, type: this.component_start_wire.type, index: this.component_start_wire.index, IO: this.component_start_wire.IO});
 
       this.setConnection(this.component_start_wire, {type: type, id: id, index: index, IO: IO}, new_id);
 
@@ -356,6 +397,14 @@ class BreadBoard extends React.Component {
       });
       this.changeComponentInputState(end.id, wire_state, end.index);
     }
+  }
+
+  updateWirePoint(wireId, index, x, y){
+    var new_points = this.wires_points.get(wireId);
+    //console.log(new_points);
+    new_points[index].x = x;
+    new_points[index].y = y; 
+    this.wires_points.set(wireId, new_points);
   }
 
   setConnection(start, end, wireId){
@@ -449,44 +498,44 @@ class BreadBoard extends React.Component {
     var components = []
     for (let i = 0; i < this.state.components.length; i++) {
       if (this.state.components[i].type === "7segmentdisplay") {
-        components.push(<SevenSegmentDisplay StartEndWire={this.startEndWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state, c: this.state.components[i].inputs[2].state, d: this.state.components[i].inputs[3].state, e: this.state.components[i].inputs[4].state, f: this.state.components[i].inputs[5].state, g: this.state.components[i].inputs[6].state, h: this.state.components[i].inputs[7].state }}></SevenSegmentDisplay>);
+        components.push(<SevenSegmentDisplay offset={this.state.offset} zoom={this.state.zoom} StartEndWire={this.startEndWire} setCoord={this.setComponentCoord} key={this.state.components[i].id} id={this.state.components[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} segments={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state, c: this.state.components[i].inputs[2].state, d: this.state.components[i].inputs[3].state, e: this.state.components[i].inputs[4].state, f: this.state.components[i].inputs[5].state, g: this.state.components[i].inputs[6].state, h: this.state.components[i].inputs[7].state }}></SevenSegmentDisplay>);
       }
       else if (this.state.components[i].type === "pushbutton") {
-        components.push(<PushButton onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
+        components.push(<PushButton offset={this.state.offset} zoom={this.state.zoom} onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y}></PushButton>);
       } else if(this.state.components[i].type === "andgate"){
-        components.push(<AndGate onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} inputs={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state}}></AndGate>);
+        components.push(<AndGate offset={this.state.offset} zoom={this.state.zoom} onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} inputs={{ a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state}}></AndGate>);
       } else if(this.state.components[i].type === "notgate"){
-        components.push(<NotGate onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} input={this.state.components[i].inputs[0].state}></NotGate>);
+        components.push(<NotGate offset={this.state.offset} zoom={this.state.zoom} onStateChange={this.changeComponentOutputState} StartEndWire={this.startEndWire} id={this.state.components[i].id} key={this.state.components[i].id} setCoord={this.setComponentCoord} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.components[i].id} x={this.components_coords.get(this.state.components[i].id).x} y={this.components_coords.get(this.state.components[i].id).y} input={this.state.components[i].inputs[0].state}></NotGate>);
       }
     }
 
     var wires = [];
     for (let i = 0; i < this.state.wires.length; i++) {
-      wires.push(<Wire onStateChange={this.changeComponentInputState} active={this.state.wires[i].active} start={this.state.wires[i].start} end={this.state.wires[i].end} key={this.state.wires[i].id} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
+      wires.push(<Wire offset={this.state.offset} zoom={this.state.zoom} updateWirePoint={this.updateWirePoint} onStateChange={this.changeComponentInputState} active={this.state.wires[i].active} start={this.state.wires[i].start} end={this.state.wires[i].end} key={this.state.wires[i].id} id={this.state.wires[i].id} onClick={this.handleComponentClick} selected={this.state.selectedComponentId === this.state.wires[i].id} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.wires_points.get(this.state.wires[i].id)}></Wire>);
     }
 
     var new_component = []
     if (this.state.new_component != null) {
       if (this.state.new_component.type === "7segmentdisplay") {
-        new_component.push(<SevenSegmentDisplay opacity={0.5} new_component={true} setCoord={this.setComponentCoord} dragging={true} key={this.state.new_component.id} id={this.state.new_component.id} onClick={() => { this.addComponent("7segmentdisplay") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} segments={{ a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false }}></SevenSegmentDisplay>)
+        new_component.push(<SevenSegmentDisplay offset={this.state.offset} zoom={this.state.zoom} opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} setCoord={this.setComponentCoord} key={this.state.new_component.id} id={this.state.new_component.id} onClick={() => { this.addComponent("7segmentdisplay") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} segments={{ a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false }} dragging={true}></SevenSegmentDisplay>)
       }
       else if (this.state.new_component.type === "pushbutton") {
-        new_component.push(<PushButton opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("pushbutton") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y}></PushButton>);
+        new_component.push(<PushButton offset={this.state.offset} zoom={this.state.zoom} opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("pushbutton") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} dragging={true}></PushButton>);
       } else if (this.state.new_component.type === "andgate") {
-        new_component.push(<AndGate opacity={0.5} new_component={true} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("andgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} inputs={{a:false, b:false}}></AndGate>);
+        new_component.push(<AndGate offset={this.state.offset}zoom={this.state.zoom} opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("andgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} inputs={{a:false, b:false}} dragging={true}></AndGate>);
       } else if (this.state.new_component.type === "notgate") {
-        new_component.push(<NotGate opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("notgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} input={false}></NotGate>);
+        new_component.push(<NotGate offset={this.state.offset} zoom={this.state.zoom} opacity={0.5} new_component={true} onStateChange={this.changeComponentOutputState} id={this.state.new_component.id} key={this.state.new_component.id} setCoord={this.setComponentCoord} onClick={() => { this.addComponent("notgate") }} selected={false} x={this.components_coords.get(this.state.new_component.id).x} y={this.components_coords.get(this.state.new_component.id).y} input={false} dragging={true}></NotGate>);
       }
     }
 
     var drawingWire = [];
     if (this.state.drawingWire) {
-      drawingWire.push(<Wire style={{ pointerEvents: "none" }} key={-1} active={true} id={-1} onClick={() => { }} selected={false} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.state.drawingWirePoints}></Wire>);
+      drawingWire.push(<Wire zoom={this.state.zoom} style={{ pointerEvents: "none" }} key={-1} active={true} id={-1} onClick={() => { }} selected={false} strokeBorder={3} strokeWidth={5} strokeColor="#00ff00" points={this.state.drawingWirePoints}></Wire>);
     }
     return (
-      <div className="breadboard" onMouseDown={this.handleContainerClick}>
+      <div className="breadboard" onMouseDown={this.handleContainerClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <g style={{transform: "scale(" + this.state.zoom + ")"}}>
+          <g transform={"translate(" + this.state.offset.x + "," + this.state.offset.y + ") scale(" + this.state.zoom + ")"}>
             {components}
             {new_component}
             {drawingWire}

@@ -1,131 +1,145 @@
 import "../css/push_button.css";
-import React from "react";
+import React, { useState, useEffect, useRef } from "react";
 
-class PushButton extends React.Component {
-    constructor(props) {
-        super(props);
+const PushButton = React.memo((props) => {
 
-        this.state = {
-            active: props.active === undefined ? false : props.active,
-            new_component: props.new_component === undefined ? false : props.new_component,
-            dragging: false,
-            position: {
-                x: parseInt(props.x),
-                y: parseInt(props.y)
-            },
-            diffX: 0,
-            diffY: 0,
-            selected: props.selected,
-            opacity: props.opacity === undefined ? 1 : props.opacity,
-            rotation: (props.rotation === undefined ? 0 : props.rotation)
-        };
-        this.onClick = props.onClick;
-        this.setCoord = props.setCoord;
-        this.onStateChange = props.onStateChange;
-        this.id = props.id;
+    const [state, setState] = useState({
+        active: props.active === undefined ? false : props.active,
+        new_component: props.new_component === undefined ? false : props.new_component,
+        dragging: props.dragging !== undefined ? props.dragging : false,
+        position: {
+            x: parseInt(props.x),
+            y: parseInt(props.y),
+        },
+        diffX: 37 * props.zoom,
+        diffY: 40 * props.zoom,
+        selected: props.selected,
+        opacity: props.opacity === undefined ? 1 : props.opacity,
+        rotation: props.rotation === undefined ? 0 : props.rotation,
+        zoom: props.zoom,
+        offset: props.offset
+    });
+    const onClick = props.onClick;
+    const setCoord = props.setCoord;
+    const onStateChange = props.onStateChange;
+    const id = props.id;
+    const start_position = { x: 0, y: 0 };
+    const StartEndWire = props.StartEndWire;
 
-        this.start_position = {x:0, y:0};
+    const stateRef = useRef(state);
+    stateRef.current = state;
 
-        this.StartEndWire = props.StartEndWire;
-
-        this._dragStart = this._dragStart.bind(this);
-        this._dragging = this._dragging.bind(this);
-        this._dragEnd = this._dragEnd.bind(this);
-        this._buttonPress = this._buttonPress.bind(this);
-        this._buttonRelease = this._buttonRelease.bind(this);
-    }
-
-    componentDidMount() {
-        if (this.state.new_component) {
-            this.setState({
-                diffX: 37,
-                diffY: 37,
-                dragging: true
-            });
-            document.addEventListener("mousemove", this._dragging);
-            document.addEventListener("mouseup", this._dragEnd);
-        }
-    }
-
-    _dragStart(e) {
+    const dragStart = (e) => {
         e.stopPropagation();
         if (e.button === 0) {
-            this.onClick(this.id)
-            if (!this.state.new_component) {
-                this.start_position.x = e.pageX;
-                this.start_position.y = e.pageY;
-                this.setState({
-                    diffX: e.pageX - e.currentTarget.getBoundingClientRect().left,
-                    diffY: e.pageY - e.currentTarget.getBoundingClientRect().top,
-                    dragging: true,
-                });
-                document.addEventListener("mousemove", this._dragging);
-                document.addEventListener("mouseup", this._dragEnd);
-            }
+          if(state.new_component){
+            setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
+          }
+          onClick(id);
+          if (!state.new_component) {
+            start_position.x = e.pageX;
+            start_position.y = e.pageY;
+            const rect = e.currentTarget.getBoundingClientRect();
+            setState((prevState) => ({
+              ...prevState,
+              diffX: e.pageX - rect.left,
+              diffY: e.pageY - rect.top,
+              dragging: true
+            }));
+            document.addEventListener("mousemove", dragging);
+            document.addEventListener("mouseup", dragEnd);
+          }
         }
-    }
-
-    _dragging(e) {
-        if (this.state.dragging && (this.start_position.x !== e.pageX || this.start_position.y !== e.pageY)) {
-            this.setState({
-                position: {
-                    x: e.pageX - this.state.diffX,
-                    y: e.pageY - this.state.diffY
-                }
-            });
-            this.setCoord(this.id, e.pageX - this.state.diffX, e.pageY - this.state.diffY);
+      };
+    
+    const dragging = (e) => {
+      e.stopPropagation();
+        if (stateRef.current.dragging && (start_position.x !== e.pageX || start_position.y !== e.pageY)) {
+          setState((prevState) => ({
+            ...prevState,
+            position: {
+              x: ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom),
+              y: ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom),
+            },
+          }));
         }
-    }
-
-    _dragEnd() {
-        if (!this.state.new_component) {
-            this.setState({
-                diffX: 0,
-                diffY: 0,
-                dragging: false,
-            });
-            document.removeEventListener("mousemove", this._dragging);
-            document.removeEventListener("mouseup", this._dragEnd);
+    };
+    
+    const dragEnd = (e) => {
+      e.stopPropagation();
+        if (!stateRef.current.new_component) {
+          setState((prevState) => ({
+            ...prevState,
+            dragging: false,
+          }));
+          setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
+          document.removeEventListener("mousemove", dragging);
+          document.removeEventListener("mouseup", dragEnd);
         }
-    }
+    };
 
-    componentDidUpdate(prevProps) {
-        if (prevProps.selected !== this.props.selected) {
-            this.setState({
-                selected: this.props.selected
-            });
+    useEffect(() => {
+        if (state.new_component) {
+          document.addEventListener("mousemove", dragging);
+          document.addEventListener("mouseup", dragEnd);
+          return () => {
+              document.removeEventListener('mousemove', dragging);
+              document.removeEventListener('mouseup', dragEnd);
+          }
         }
-    }
+    }, []);
 
-    _buttonPress(e) {
-        if (!this.state.new_component) {
-            this.setState({
+    useEffect(() => {
+        if (props.selected !== state.selected) {
+          setState((prevState) => ({
+            ...prevState,
+            selected: props.selected,
+          }));
+        }
+        if(props.zoom != state.zoom){
+          setState((prevState) => ({
+            ...prevState,
+            zoom: props.zoom
+          }));
+        }
+        if(props.offset != state.offset){
+          setState((prevState) => ({
+            ...prevState,
+            offset: props.offset
+          }));
+        }
+    }, [props.selected, props.zoom, props.offset]);
+
+    const _buttonPress = (e) => {
+        if (!stateRef.current.new_component) {
+            setState((prevState) => ({
+                ...prevState,
                 active: true
-            });
-            this.onStateChange(this.id, true, 0);
+            }));
+            onStateChange(id, true, 0);
         }
-    }
+    };
 
-    _buttonRelease(e) {
-        if (!this.state.new_component) {
-            this.setState({
+    const _buttonRelease = (e) => {
+        if (!stateRef.current.new_component) {
+            setState((prevState) => ({
+                ...prevState,
                 active: false
-            });
-            this.onStateChange(this.id, false, 0);
+            }));
+            onStateChange(id, false, 0);
         }
     }
 
-    render() {
-        return (
-            <g opacity={this.state.opacity} onMouseDown={this._dragStart} onMouseMove={this._dragging} onMouseUp={this._dragEnd} className={"Component-pushbutton-" + this.id} transform={"translate(" + this.state.position.x + "," + this.state.position.y + ") rotate(" + this.state.rotation + ")"} width="137" height="86" viewBox="0 0 137 86" fill="none">
+    return (
+            <g opacity={state.opacity} onMouseDown={dragStart} className={"Component-pushbutton-" + id} transform={"translate(" + state.position.x + "," + state.position.y + ") rotate(" + state.rotation + ")"} width="137" height="86" viewBox="0 0 137 86" fill="none">
                 <g className="PushButton">
-                    <path opacity={this.state.selected?1:0} className="select-border" fillRule="evenodd" clipRule="evenodd" d="M81.3069 48C77.7897 66.7843 61.305 81 41.5 81C19.1325 81 1 62.8675 1 40.5C1 18.1325 19.1325 0 41.5 0C61.6549 0 78.3712 14.7226 81.4812 34H102.412C105.143 27.5361 111.542 23 119 23C128.941 23 137 31.0589 137 41C137 50.9411 128.941 59 119 59C111.542 59 105.143 54.4639 102.412 48H81.3069Z" fill="#0A9DFF" />
+                    <path opacity={state.selected?1:0} className="select-border" fillRule="evenodd" clipRule="evenodd" d="M81.3069 48C77.7897 66.7843 61.305 81 41.5 81C19.1325 81 1 62.8675 1 40.5C1 18.1325 19.1325 0 41.5 0C61.6549 0 78.3712 14.7226 81.4812 34H102.412C105.143 27.5361 111.542 23 119 23C128.941 23 137 31.0589 137 41C137 50.9411 128.941 59 119 59C111.542 59 105.143 54.4639 102.412 48H81.3069Z" fill="#0A9DFF" />
                     <path className="Line" d="M41 41H119" stroke="black" strokeWidth="8" strokeLinecap="round" />
                     <g className="button" filter="url(#filter0_d_3_2)">
-                        <circle onMouseDown={this._buttonPress} onMouseUp={this._buttonRelease} cx="41.5" cy="40.5" r="37.5" fill={this.state.active?"#ea2828":"#531F21"} />
+                        <circle onMouseDown={_buttonPress} onMouseUp={_buttonRelease} cx="41.5" cy="40.5" r="37.5" fill={state.active?"#ea2828":"#531F21"} />
                         <circle cx="41.5" cy="40.5" r="35" stroke="black" strokeWidth="5" />
                     </g>
-                    <circle onMouseDown={(e) => {this.StartEndWire(e,this.id, "pushbutton", 0, "output")} } className="IO Out-0" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
+                    <circle onMouseDown={(e) => {StartEndWire(e,id, "pushbutton", 0, "output")} } className="IO Out-0" cx="119" cy="41" r="12.5" fill="black" stroke="black" strokeWidth="5" />
                 </g>
                 <defs>
                     <filter id="filter0_d_3_2" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
@@ -140,8 +154,7 @@ class PushButton extends React.Component {
                     </filter>
                 </defs>
             </g>
-        );
-    }
-}
+    );
+});
 
 export default PushButton;
