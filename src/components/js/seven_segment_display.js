@@ -1,44 +1,75 @@
 import "../css/seven_segment_display.css";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback} from "react";
 
 const SevenSegmentDisplay = React.memo((props) => {
 
+  // Destructure props and set initial state using useState
+  const {
+    new_component = false,
+    dragging = false,
+    x,
+    y,
+    zoom,
+    selected,
+    opacity = 1,
+    rotation = 0,
+    segments,
+    offset,
+    onClick,
+    setCoord,
+    id,
+    StartEndWire
+  } = props;
+
   const [state, setState] = useState({
-    new_component: props.new_component === undefined ? false : props.new_component,
-    dragging: props.dragging !== undefined ? props.dragging : false,
+    new_component,
+    dragging,
     position: {
-        x: parseInt(props.x),
-        y: parseInt(props.y),
+      x: parseInt(x),
+      y: parseInt(y),
     },
-    diffX: 124 * props.zoom,
-    diffY: 162 * props.zoom,
-    selected: props.selected,
-    opacity: props.opacity === undefined ? 1 : props.opacity,
-    rotation: props.rotation === undefined ? 0 : props.rotation,
-    segments: props.segments,
-    zoom: props.zoom,
-    offset: props.offset
+    diffX: 124 * zoom,
+    diffY: 162 * zoom,
+    selected,
+    opacity,
+    rotation,
+    segments,
+    zoom,
+    offset
   });
-  const onClick = props.onClick;
-  const setCoord = props.setCoord;
-  const onStateChange = props.onStateChange;
-  const id = props.id;
-  const start_position = { x: 0, y: 0 };
-  const StartEndWire = props.StartEndWire;
+
+  const start_position = useRef({ x: 0, y: 0 });
 
   const stateRef = useRef(state);
   stateRef.current = state;
 
-  const dragStart = (e) => {
+  useEffect(() => {
+    if (state.new_component) {
+      // Add event listeners when new_component is true
+      document.addEventListener("mousemove", _dragging);
+      document.addEventListener("mouseup", dragEnd);
+      return () => {
+        // Clean up event listeners when component unmounts or new_component is false
+        document.removeEventListener('mousemove', _dragging);
+        document.removeEventListener('mouseup', dragEnd);
+      }
+    }
+    // eslint-disable-next-line
+  }, []);
+
+  const dragStart = useCallback((e) => {
     e.stopPropagation();
     if (e.button === 0) {
-      if(state.new_component){
-        setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
+      if (state.new_component) {
+        setCoord(
+          id,
+          (e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom,
+          (e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom
+        );
       }
       onClick(id);
       if (!state.new_component) {
-        start_position.x = e.pageX;
-        start_position.y = e.pageY;
+        start_position.current = { x: e.pageX, y: e.pageY };
         const rect = e.currentTarget.getBoundingClientRect();
         setState((prevState) => ({
           ...prevState,
@@ -46,73 +77,71 @@ const SevenSegmentDisplay = React.memo((props) => {
           diffY: e.pageY - rect.top,
           dragging: true
         }));
-        document.addEventListener("mousemove", dragging);
+        document.addEventListener("mousemove", _dragging);
         document.addEventListener("mouseup", dragEnd);
       }
     }
-  };
+    // eslint-disable-next-line
+  }, []);
 
-  const dragging = (e) => {
-    if (stateRef.current.dragging && (start_position.x !== e.pageX || start_position.y !== e.pageY)) {
+  const _dragging = useCallback((e) => {
+    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY)) {
       setState((prevState) => ({
         ...prevState,
         position: {
-          x: ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom),
-          y: ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom),
+          x: (e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom,
+          y: (e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom,
         },
       }));
     }
-  };
+    // eslint-disable-next-line
+  }, []);
 
-  const dragEnd = (e) => {
+  const dragEnd = useCallback((e) => {
     if (!stateRef.current.new_component) {
       setState((prevState) => ({
         ...prevState,
         dragging: false,
       }));
-      setCoord(id, ((e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom), ((e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom));
-      document.removeEventListener("mousemove", dragging);
+      setCoord(
+        id,
+        (e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom,
+        (e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom
+      );
+      document.removeEventListener("mousemove", _dragging);
       document.removeEventListener("mouseup", dragEnd);
     }
-  };
-
-  useEffect(() => {
-    if (state.new_component) {
-      document.addEventListener("mousemove", dragging);
-      document.addEventListener("mouseup", dragEnd);
-      return () => {
-          document.removeEventListener('mousemove', dragging);
-          document.removeEventListener('mouseup', dragEnd);
-      }
-    }
+    // eslint-disable-next-line
   }, []);
 
   useEffect(() => {
-    if (props.selected !== state.selected) {
+    // Update state when props change
+    if (selected !== state.selected) {
       setState((prevState) => ({
         ...prevState,
-        selected: props.selected,
+        selected: selected,
       }));
     }
-    if(props.segments !== state.segments){
+    if(JSON.stringify(segments) !== JSON.stringify(state.segments)){
       setState((prevState) => ({
         ...prevState,
-        segments: props.segments,
+        segments: segments,
       }));
     }
-    if(props.zoom != state.zoom){
+    if(zoom !== state.zoom){
       setState((prevState) => ({
         ...prevState,
-        zoom: props.zoom
+        zoom: zoom
       }));
     }
-    if(props.offset != state.offset){
+    if(offset !== state.offset){
       setState((prevState) => ({
         ...prevState,
-        offset: props.offset
+        offset: offset
       }));
     }
-  }, [props.selected, props.segments, props.zoom, props.offset]);
+    // eslint-disable-next-line
+  }, [selected, segments, zoom, offset]);
 
   return (
       <g opacity={state.opacity} onMouseDown={dragStart} transform={"translate(" + state.position.x + "," + state.position.y + ") rotate(" + state.rotation + ")"} className={"Component-7segmentdisplay-" + id.toString()}>

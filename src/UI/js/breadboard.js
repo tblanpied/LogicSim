@@ -21,7 +21,8 @@ class BreadBoard extends React.Component {
       drawingWirePoints: [],             // Points of the wire being drawn
       zoom: 1.0,                         // Zoom level of the app
       offset: { x: 0, y: 0 },            // Offset of the breadboard
-      dragging: false                    // Flag indicating if the breadboard is being dragged
+      dragging: false,                   // Flag indicating if the breadboard is being dragged
+      dragging_offset: { x: 0, y: 0 }
     };
   
     // Additional instance variables
@@ -39,7 +40,6 @@ class BreadBoard extends React.Component {
     this.setComponentCoord = this.setComponentCoord.bind(this);
     this.delNewComponent = this.delNewComponent.bind(this);
     this.startWire = this.startWire.bind(this);
-    this.drawWire = this.drawWire.bind(this);
     this.addWirePoint = this.addWirePoint.bind(this);
     this.stopDrawingWire = this.stopDrawingWire.bind(this);
     this.endWire = this.endWire.bind(this);
@@ -116,10 +116,10 @@ class BreadBoard extends React.Component {
       zoom: new_zoom,
       offset: { x: translateX, y: translateY }
     });
-    if(new_zoom == config.breadboard.zoom.min && document.getElementsByClassName("zoomout-btn")[0].classList.contains("toolbar_active_btn")){
+    if(new_zoom === config.breadboard.zoom.min && document.getElementsByClassName("zoomout-btn")[0].classList.contains("toolbar_active_btn")){
       document.getElementsByClassName("zoomout-btn")[0].classList.remove("toolbar_active_btn");
     } 
-    if(new_zoom == config.breadboard.zoom.max && document.getElementsByClassName("zoomin-btn")[0].classList.contains("toolbar_active_btn")){
+    if(new_zoom === config.breadboard.zoom.max && document.getElementsByClassName("zoomin-btn")[0].classList.contains("toolbar_active_btn")){
       document.getElementsByClassName("zoomin-btn")[0].classList.remove("toolbar_active_btn");
     }
     if(new_zoom > config.breadboard.zoom.min && new_zoom < config.breadboard.zoom.max){
@@ -150,16 +150,22 @@ class BreadBoard extends React.Component {
     });
     document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
 
-    // Store the initial click position and offset for dragging
-    this.dragging_start_pos.x = e.pageX;
-    this.dragging_start_pos.y = e.pageY;
-    this.dragging_start_offset.x = this.state.offset.x;
-    this.dragging_start_offset.y = this.state.offset.y;
+    if(e.button == 0){
+      // Store the initial click position and offset for dragging
+      this.dragging_start_pos.x = e.pageX;
+      this.dragging_start_pos.y = e.pageY;
+      this.dragging_start_offset.x = this.state.offset.x;
+      this.dragging_start_offset.y = this.state.offset.y;
 
-    // Enable dragging mode
-    this.setState({
-      dragging: true
-    });
+      // Enable dragging mode
+      this.setState({
+        dragging: true,
+        dragging_offset: {
+          x: this.state.offset.x,
+          y: this.state.offset.y
+        }
+      });
+    }
   }
 
   // dragging: Handle the dragging functionality of the breadboard
@@ -167,7 +173,7 @@ class BreadBoard extends React.Component {
     // Update the offset based on the dragging movement
     if (this.state.dragging && !this.state.drawingWire) {
       this.setState({
-        offset: {
+        dragging_offset: {
           x: this.dragging_start_offset.x - (this.dragging_start_pos.x - e.pageX),
           y: this.dragging_start_offset.y - (this.dragging_start_pos.y - e.pageY)
         }
@@ -178,9 +184,15 @@ class BreadBoard extends React.Component {
   // dragEnd: Handle the end of dragging of the breadboard
   dragEnd(e) {
     // Disable dragging mode
-    this.setState({
-      dragging: false
-    });
+    if(this.state.dragging){
+      this.setState({
+        dragging: false,
+        offset: {
+          x: this.state.dragging_offset.x,
+          y: this.state.dragging_offset.y
+        }
+      });
+    }
   }
 
   getUniqueId() {
@@ -211,12 +223,15 @@ class BreadBoard extends React.Component {
 
     // Remove the context menu event listener
     document.removeEventListener("contextmenu", this.delNewComponent);
+ 
+    if(this.state.new_component !== null){
+      // Delete the new component from the coordinates map and update the state
+      this.components_coords.delete(this.state.new_component.id);
 
-    // Delete the new component from the coordinates map and update the state
-    this.components_coords.delete(this.state.new_component.id);
-    this.setState({
-      new_component: null
-    });
+      this.setState({
+        new_component: null
+      });
+    }
   }
 
   // addComponent: Add a new component to the state with its inputs and outputs
@@ -265,7 +280,7 @@ class BreadBoard extends React.Component {
 
       // Find the selected component and remove it from the components array
       components.filter((value, index, arr) => {
-        if (value.id == this.state.selectedComponentId) {
+        if (value.id === this.state.selectedComponentId) {
           // Add the associated wire IDs to the wires_to_delete array
           for (let i = 0; i < value.inputs.length; i++) {
             for (let j = 0; j < value.inputs[i].connections.length; j++) {
@@ -398,7 +413,6 @@ class BreadBoard extends React.Component {
 
     // Add event listeners for wire drawing
     document.addEventListener("mousedown", this.addWirePoint, { capture: true });
-    document.addEventListener("mousemove", this.drawWire);
     document.addEventListener("contextmenu", this.stopDrawingWire);
   }
 
@@ -448,13 +462,15 @@ class BreadBoard extends React.Component {
 
       var wire_state = false;
       this.state.components.map((c, i) => {
-        if (c.id == start.id) {
+        if (c.id === start.id) {
           c.outputs.map((c, i) => {
-            if (i == start.index) {
+            if (i === start.index) {
               wire_state = c.state;
             }
+            return c;
           });
         }
+        return c;
       });
 
       // Update the state with the new wire and wire points
@@ -470,31 +486,17 @@ class BreadBoard extends React.Component {
   }
 
   /**
-   * Updates the current wire points during the wire drawing process.
-   * @param {Event} e - The event object.
-   */
-  drawWire(e) {
-    this.setState({
-      drawingWirePoints: this.state.drawingWirePoints.map((p, i) => {
-        if (i === this.state.drawingWirePoints.length - 1) {
-          p.x = (e.pageX - this.state.offset.x) / this.state.zoom;
-          p.y = (e.pageY - this.state.offset.y) / this.state.zoom;
-          return p;
-        } else {
-          return p;
-        }
-      })
-    });
-  }
-
-  /**
    * Adds a new point to the wire drawing process.
    * @param {Event} e - The event object.
    */
   addWirePoint(e) {
     if (e.button === 0) {
+      var drawingWirePoints = [...this.state.drawingWirePoints];
+      drawingWirePoints[drawingWirePoints.length - 1].x = (e.pageX - this.state.offset.x) / this.state.zoom;
+      drawingWirePoints[drawingWirePoints.length - 1].y = (e.pageY - this.state.offset.y) / this.state.zoom;
+      drawingWirePoints.push({ x: (e.pageX - this.state.offset.x) / this.state.zoom, y: (e.pageY - this.state.offset.y) / this.state.zoom });
       this.setState({
-        drawingWirePoints: [...this.state.drawingWirePoints, { x: (e.pageX - this.state.offset.x) / this.state.zoom, y: (e.pageY - this.state.offset.y) / this.state.zoom }]
+        drawingWirePoints: drawingWirePoints
       });
     }
   }
@@ -506,7 +508,6 @@ class BreadBoard extends React.Component {
   stopDrawingWire(e) {
     e.preventDefault();
     document.removeEventListener("mousedown", this.addWirePoint, { capture: true });
-    document.removeEventListener("mousemove", this.drawWire);
     document.removeEventListener("contextmenu", this.stopDrawingWire, { capture: true });
     this.setState({
       drawingWirePoints: [],
@@ -569,13 +570,13 @@ class BreadBoard extends React.Component {
 
     this.setState({
       components: this.state.components.map((c, i) => {
-        if (c.id == id) {
+        if (c.id === id) {
           c.outputs.map((output, i) => {
-            if (i == index) {
+            if (i === index) {
               // Update the state of the output
               output.state = state;
 
-              if (output.connections.length != 0) {
+              if (output.connections.length !== 0) {
                 // Collect the IDs of connected wires
                 wireIds = output.connections.map((connection) => {
                   return connection.wireId;
@@ -589,7 +590,7 @@ class BreadBoard extends React.Component {
       })
     });
 
-    if (wireIds.length != 0) {
+    if (wireIds.length !== 0) {
       // Update the state of connected wires
       this.setState({
         wires: this.state.wires.map((wire) => {
@@ -611,9 +612,9 @@ class BreadBoard extends React.Component {
   changeComponentInputState(id, state, index) {
     this.setState({
       components: this.state.components.map((c, i) => {
-        if (c.id == id) {
+        if (c.id === id) {
           c.inputs.map((input, i) => {
-            if (i == index) {
+            if (i === index) {
               // Update the state of the input
               input.state = state;
             }
@@ -675,6 +676,7 @@ class BreadBoard extends React.Component {
       }
       // Render AndGate component
       else if (this.state.components[i].type === "andgate") {
+        const inputs = {a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state};
         components.push(
           <AndGate
             offset={this.state.offset}
@@ -688,10 +690,7 @@ class BreadBoard extends React.Component {
             selected={this.state.selectedComponentId === this.state.components[i].id}
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
-            inputs={{
-              a: this.state.components[i].inputs[0].state,
-              b: this.state.components[i].inputs[1].state
-            }}
+            inputs={inputs}
           ></AndGate>
         );
       }
@@ -748,7 +747,6 @@ class BreadBoard extends React.Component {
             zoom={this.state.zoom}
             opacity={0.5}
             new_component={true}
-            onStateChange={this.changeComponentOutputState}
             setCoord={this.setComponentCoord}
             key={this.state.new_component.id}
             id={this.state.new_component.id}
@@ -847,7 +845,7 @@ class BreadBoard extends React.Component {
     return (
       <div className="breadboard" onMouseDown={this.handleBreadboardClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
-          <g transform={"translate(" + this.state.offset.x + "," + this.state.offset.y + ") scale(" + this.state.zoom + ")"}>
+          <g transform={"translate(" + (this.state.dragging ? this.state.dragging_offset.x : this.state.offset.x) + "," + (this.state.dragging ? this.state.dragging_offset.y : this.state.offset.y) + ") scale(" + this.state.zoom + ")"}>
             {components}
             {new_component}
             {drawingWire}

@@ -1,5 +1,5 @@
 import "../css/wire.css";
-import React, { useState, useEffect, useRef } from "react";
+import React, { useState, useEffect, useRef, useCallback, useMemo} from "react";
 import { config } from '../../config';
 
 const Wire = React.memo((props) => {
@@ -42,8 +42,18 @@ const Wire = React.memo((props) => {
   const stateRef = useRef(state);
   stateRef.current = state;
 
+  useEffect(() => {
+    if(state.dragging){
+      document.addEventListener("mousemove", dragging);
+      return () => {
+        document.removeEventListener('mousemove', dragging);
+      }
+    }
+    // eslint-disable-next-line
+  }, []);
+
   // Function to observe changes in the start and end components output / input
-  const observe = (zoom, offset) => {
+  const observe = useCallback(() => {
     if (state.end !== undefined && state.start !== undefined) {
       if (state.start_observer !== null) {
         state.start_observer.disconnect();
@@ -76,13 +86,13 @@ const Wire = React.memo((props) => {
               x:
                 (target.getBoundingClientRect().left +
                   target.getBoundingClientRect().width / 2 -
-                  offset.x) /
-                zoom,
+                  state.offset.x) /
+                  state.zoom,
               y:
                 (target.getBoundingClientRect().top +
                   target.getBoundingClientRect().height / 2 -
-                  offset.y) /
-                zoom,
+                  state.offset.y) /
+                state.zoom,
             };
             setState((prevState) => ({
               ...prevState,
@@ -116,13 +126,13 @@ const Wire = React.memo((props) => {
               x:
                 (target.getBoundingClientRect().left +
                   target.getBoundingClientRect().width / 2 -
-                  offset.x) /
-                zoom,
+                  state.offset.x) /
+                  state.zoom,
               y:
                 (target.getBoundingClientRect().top +
                   target.getBoundingClientRect().height / 2 -
-                  offset.y) /
-                zoom,
+                  state.offset.y) /
+                  state.zoom,
             };
             setState((prevState) => ({
               ...prevState,
@@ -144,17 +154,18 @@ const Wire = React.memo((props) => {
         start_observer,
         end_observer,
       }));
-    }
-  };
+    } 
+    // eslint-disable-next-line
+  }, [state.zoom, state.offset]); 
 
   // useEffect to update the observation of the start and end components output / input 
   useEffect(() => {
-    observe(state.zoom, state.offset);
-  }, []);
+    observe();
+  }, [observe]);
 
 
   // Adjusts the brightness of a color by the given amount
-  const LightenDarkenColor = (col, amt) => {
+  const LightenDarkenColor = useCallback((col, amt) => {
     var usePound = false;
     if (col[0] === "#") {
       col = col.slice(1);
@@ -180,10 +191,10 @@ const Wire = React.memo((props) => {
 
     const res = (g | (b << 8) | (r << 16)).toString(16);
     return (usePound ? "#" : "") + "0".repeat(6 - res.length) + res;
-  };
+  }, []);
 
   // Event handler for dragging start
-  const dragStart = (e, i) => {
+  const dragStart = useCallback((e, i) => {
     e.stopPropagation();
     setState((prevState) => ({
       ...prevState,
@@ -192,35 +203,36 @@ const Wire = React.memo((props) => {
     }));
     document.addEventListener("mousemove", dragging);
     document.addEventListener("mouseup", dragEnd);
-  };
+    // eslint-disable-next-line
+  }, []);
 
   // Event handler for dragging
-  const dragging = (e) => {
+  const dragging = useCallback((e) => {
     if (stateRef.current.dragging) {
       let points = [...stateRef.current.points];
       let point = { ...points[stateRef.current.point_dragged] };
-      point.x = (e.pageX - state.offset.x) / stateRef.current.zoom;
-      point.y = (e.pageY - state.offset.y) / stateRef.current.zoom;
+      point.x = (e.pageX - stateRef.current.offset.x) / stateRef.current.zoom;
+      point.y = (e.pageY - stateRef.current.offset.y) / stateRef.current.zoom;
       points[stateRef.current.point_dragged] = point;
       setState((prevState) => ({
         ...prevState,
         points: points
       }));
     }
-  };
+  }, []);
 
   // Event handler for dragging end
-  const dragEnd = (e) => {
+  const dragEnd = useCallback((e) => {
     setState((prevState) => ({
       ...prevState,
       dragging: false,
       point_dragged: null
     }));
-    const { point_dragged, points, zoom, offset } = stateRef.current;
-    updateWirePoint(id, point_dragged, points[point_dragged].x, points[point_dragged].y);
+    updateWirePoint(id, stateRef.current.point_dragged, stateRef.current.points[stateRef.current.point_dragged].x, stateRef.current.points[stateRef.current.point_dragged].y);
     document.removeEventListener("mousemove", dragging);
     document.removeEventListener("mouseup", dragEnd);
-  };
+    // eslint-disable-next-line
+  }, []);
 
   // ComponentDidUpdate
   useEffect(() => {
@@ -250,7 +262,7 @@ const Wire = React.memo((props) => {
     }
 
     // Check if the point_dragged prop has changed
-    if (props.point_dragged !== state.point_dragged) {
+    if (props.point_dragged !== undefined && props.point_dragged !== state.point_dragged) {
       setState((prevState) => ({
         ...prevState,
         point_dragged: props.point_dragged
@@ -258,15 +270,11 @@ const Wire = React.memo((props) => {
     }
 
     // Check if zoom or offset props have changed
-    var zoom = false;
-    var offset = false;
-
     if (props.zoom !== state.zoom) {
       setState((prevState) => ({
         ...prevState,
         zoom: props.zoom
       }));
-      zoom = true;
     }
 
     if (props.offset !== state.offset) {
@@ -274,31 +282,34 @@ const Wire = React.memo((props) => {
         ...prevState,
         offset: props.offset
       }));
-      offset = true;
     }
 
-    // Call observe if zoom or offset has changed
-    if (zoom && offset) {
-      observe(props.zoom, props.offset);
-    } else if (zoom) {
-      observe(props.zoom, state.offset);
-    } else if (offset) {
-      observe(state.zoom, props.offset);
+    if(props.dragging !== undefined && props.dragging !== state.dragging){
+      setState((prevState) => ({
+        ...prevState,
+        dragging: props.dragging
+      }));
+      if(props.dragging){
+        document.addEventListener("mousemove", dragging);
+      } else {
+        document.removeEventListener("mousemove", dragging);
+      }
     }
-  }, [props.selected, props.points, props.active, props.zoom, props.offset, props.point_dragged]);
+    // eslint-disable-next-line
+  }, [props.selected, props.points, props.active, props.zoom, props.offset, props.point_dragged, props.dragging]);
 
   const strokeWidth = props.strokeWidth === undefined ? 1 : props.strokeWidth;
   const strokeColor = props.strokeColor === undefined ? "#000000" : props.strokeColor;
   const strokeBorder = props.strokeBorder === undefined ? 0 : props.strokeBorder;
-  const inactiveColor = LightenDarkenColor(strokeColor, -175);
+  const inactiveColor = useMemo(() => {
+    return LightenDarkenColor(strokeColor, -175)
+    // eslint-disable-next-line
+  }, [strokeColor]);
 
   // Calculate angle between three points
-  const angle = (A, B, C) =>
-    ((Math.atan2(C.y - B.y, C.x - B.x) -
-      Math.atan2(A.y - B.y, A.x - B.x) +
-      3 * Math.PI) %
-      (2 * Math.PI)) -
-    Math.PI;
+  const angle = useCallback((A, B, C) => {
+    return (((Math.atan2(C.y - B.y, C.x - B.x) - Math.atan2(A.y - B.y, A.x - B.x) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
+  }, [])
 
   // Initialize variables
   var data = "";
@@ -313,11 +324,7 @@ const Wire = React.memo((props) => {
     // Add points (circles) for the first point if selected
     points.push(
       <g
-        onMouseDown={(e) => {
-          dragStart(e, 0);
-        }}
-        onMouseMove={dragging}
-        onMouseUp={dragEnd}
+        onMouseDown={(e) => {dragStart(e, 0);}}
         key={key++}
       >
         <circle
@@ -348,7 +355,7 @@ const Wire = React.memo((props) => {
     var dyb = state.points[i + 1].y - state.points[i].y;
 
     // Snap to horizontal or vertical lines if dragged close enough
-    if (state.dragging && state.point_dragged != null && state.point_dragged == i) {
+    if (state.dragging && state.point_dragged !== null && state.point_dragged === i) {
       //va hozizontal
       if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
         dya = 0;
@@ -380,17 +387,17 @@ const Wire = React.memo((props) => {
     }
 
     var va = {
-      x: (dxa == 0 && dya == 0) ? 0 : dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
-      y: (dxa == 0 && dya == 0) ? 0 : dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+      x: (dxa === 0 && dya === 0) ? 0 : dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+      y: (dxa === 0 && dya === 0) ? 0 : dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
     };
     var vb = {
-      x: (dxb == 0 && dyb == 0) ? 0 : dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
-      y: (dxb == 0 && dyb == 0) ? 0 : dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      x: (dxb === 0 && dyb === 0) ? 0 : dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      y: (dxb === 0 && dyb === 0) ? 0 : dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
     };
 
     var angleBetweenLines = Math.acos((-va.x) * vb.x + (-va.y) * vb.y);
     var r = 0;
-    if (Math.tan((angleBetweenLines) / 2) != 0) {
+    if (Math.tan((angleBetweenLines) / 2) !== 0) {
       r = radius / Math.tan((angleBetweenLines) / 2);
     }
     if (r > 25) {
@@ -419,8 +426,6 @@ const Wire = React.memo((props) => {
       points.push(
         <g 
           onMouseDown={(e) => { dragStart(e, i) }} 
-          onMouseMove={dragging} 
-          onMouseUp={dragEnd} 
           key={key++}>
           <circle 
             key={key++} 
@@ -444,9 +449,9 @@ const Wire = React.memo((props) => {
   }
 
   // Snap to horizontal or vertical lines when the wire is being drawn
-  if (state.dragging && state.point_dragged != null && state.point_dragged == state.points.length - 1) {
-    var dxa = state.points[state.point_dragged].x - state.points[state.point_dragged - 1].x;
-    var dya = state.points[state.point_dragged].y - state.points[state.point_dragged - 1].y;
+  if (state.dragging && state.point_dragged !== null && state.point_dragged === state.points.length - 1) {
+    dxa = state.points[state.point_dragged].x - state.points[state.point_dragged - 1].x;
+    dya = state.points[state.point_dragged].y - state.points[state.point_dragged - 1].y;
     //hozizontal
     if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
       dya = 0;
@@ -471,8 +476,6 @@ const Wire = React.memo((props) => {
     points.push(
       <g 
         onMouseDown={(e) => { dragStart(e, state.points.length - 1) }} 
-        onMouseMove={dragging} 
-        onMouseUp={dragEnd} 
         key={key++}
       >
         <circle 
