@@ -128,7 +128,9 @@ const PushButton = React.memo((props) => {
     if(zoom !== state.zoom){
       setState((prevState) => ({
         ...prevState,
-        zoom: zoom
+        zoom: zoom,
+        diffX: state.diffX * (zoom / state.zoom),
+        diffY: state.diffY * (zoom / state.zoom)
       }));
     }
     if(offset !== state.offset){

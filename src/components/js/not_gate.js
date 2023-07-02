@@ -162,6 +162,8 @@ const NotGate = React.memo((props) => {
       setState((prevState) => ({
         ...prevState,
         zoom: zoom,
+        diffX: state.diffX * (zoom / state.zoom),
+        diffY: state.diffY * (zoom / state.zoom)
       }));
     }
     if (offset !== state.offset) {

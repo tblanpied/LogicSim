@@ -18,9 +18,6 @@ import {ReactComponent as AnnotAdd} from '../svg/annot-add.svg';
 import {ReactComponent as AnnotVisibility} from '../svg/annot-visibility.svg';
 
 class ToolBar extends React.Component{
-    constructor(props){
-        super(props);
-    }
 
     render(){
         return(

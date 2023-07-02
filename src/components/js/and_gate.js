@@ -35,12 +35,12 @@ const AndGate = React.memo((props) => {
     selected,
     opacity,
     rotation,
-    inputs,
+    inputs: JSON.parse(inputs),
     zoom,
     offset,
   });
 
-  const [outputState, setOutputState] = useState(true);
+  const [outputState, setOutputState] = useState(false);
 
   const start_position = useRef({ x: 0, y: 0 });
   const stateRef = useRef(state);
@@ -51,7 +51,6 @@ const AndGate = React.memo((props) => {
     if (state.new_component) {
       document.addEventListener("mousemove", _dragging);
       document.addEventListener("mouseup", dragEnd);
-      console.log("use effect 1");
       return () => {
         // Remove event listeners on cleanup
         document.removeEventListener("mousemove", _dragging);
@@ -148,21 +147,24 @@ const AndGate = React.memo((props) => {
         selected: selected,
       }));
     }
-    if (JSON.stringify(inputs) !== JSON.stringify(state.inputs)) {
+    if (inputs !== JSON.stringify(state.inputs)) {
+      var new_inputs = JSON.parse(inputs);
       setState((prevState) => ({
         ...prevState,
-        inputs: inputs,
+        inputs: new_inputs,
       }));
       // Update output state and call onStateChange prop
-      if ((inputs.a && inputs.b) !== outputState) {
-        setOutputState(inputs.a && inputs.b);
-        onStateChange(id, inputs.a && inputs.b, 0);
+      if ((new_inputs.a && new_inputs.b) !== outputState) {
+        setOutputState(new_inputs.a && new_inputs.b);
+        onStateChange(id, new_inputs.a && new_inputs.b, 0);
       }
     }
     if (zoom !== state.zoom) {
       setState((prevState) => ({
         ...prevState,
         zoom: zoom,
+        diffX: state.diffX * (zoom / state.zoom),
+        diffY: state.diffY * (zoom / state.zoom)
       }));
     }
     if (offset !== state.offset) {

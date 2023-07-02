@@ -59,16 +59,16 @@ class BreadBoard extends React.Component {
       // Add event listeners to component picker items
       // Trigger addNewComponent method with the corresponding component type
       const sevensegdisplay = document.getElementsByClassName("component_picker_item item-7segmentdisplay")[0];
-      sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent("7segmentdisplay") });
+      sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent(e, "7segmentdisplay") });
 
       const pushbutton = document.getElementsByClassName("component_picker_item item-pushbutton")[0];
-      pushbutton.addEventListener("click", (e) => { this.addNewComponent("pushbutton") });
+      pushbutton.addEventListener("click", (e) => { this.addNewComponent(e, "pushbutton") });
 
       const andgate = document.getElementsByClassName("component_picker_item item-ANDgate")[0];
-      andgate.addEventListener("click", (e) => { this.addNewComponent("andgate") });
+      andgate.addEventListener("click", (e) => { this.addNewComponent(e, "andgate") });
 
       const notgate = document.getElementsByClassName("component_picker_item item-NOTgate")[0];
-      notgate.addEventListener("click", (e) => { this.addNewComponent("notgate") });
+      notgate.addEventListener("click", (e) => { this.addNewComponent(e, "notgate") });
 
       // Add event listener to the delete button
       // Trigger deleteComponent method when clicked
@@ -150,7 +150,7 @@ class BreadBoard extends React.Component {
     });
     document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
 
-    if(e.button == 0){
+    if(e.button === 0){
       // Store the initial click position and offset for dragging
       this.dragging_start_pos.x = e.pageX;
       this.dragging_start_pos.y = e.pageY;
@@ -200,7 +200,7 @@ class BreadBoard extends React.Component {
   }
 
   // addNewComponent: Add a new component to the state and set its initial coordinates
-  addNewComponent(name) {
+  addNewComponent(e, name) {
     // Generate a unique ID for the new component
     let id = this.getUniqueId();
 
@@ -211,7 +211,7 @@ class BreadBoard extends React.Component {
     this.setState({
       new_component: new_component
     });
-    this.setComponentCoord(id, 0, 0);
+    this.setComponentCoord(id, (-this.state.offset.x) / this.state.zoom, (window.screen.height - this.state.offset.y) / this.state.zoom);
 
     // Add a context menu event listener to delete the new component
     document.addEventListener("contextmenu", this.delNewComponent);
@@ -643,7 +643,7 @@ class BreadBoard extends React.Component {
             selected={this.state.selectedComponentId === this.state.components[i].id}
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
-            segments={{
+            segments={JSON.stringify({
               a: this.state.components[i].inputs[0].state,
               b: this.state.components[i].inputs[1].state,
               c: this.state.components[i].inputs[2].state,
@@ -652,7 +652,7 @@ class BreadBoard extends React.Component {
               f: this.state.components[i].inputs[5].state,
               g: this.state.components[i].inputs[6].state,
               h: this.state.components[i].inputs[7].state
-            }}
+            })}
           ></SevenSegmentDisplay>
         );
       }
@@ -676,7 +676,6 @@ class BreadBoard extends React.Component {
       }
       // Render AndGate component
       else if (this.state.components[i].type === "andgate") {
-        const inputs = {a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state};
         components.push(
           <AndGate
             offset={this.state.offset}
@@ -690,7 +689,7 @@ class BreadBoard extends React.Component {
             selected={this.state.selectedComponentId === this.state.components[i].id}
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
-            inputs={inputs}
+            inputs={JSON.stringify({a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state})}
           ></AndGate>
         );
       }
@@ -754,7 +753,7 @@ class BreadBoard extends React.Component {
             selected={false}
             x={this.components_coords.get(this.state.new_component.id).x}
             y={this.components_coords.get(this.state.new_component.id).y}
-            segments={{ a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false }}
+            segments={JSON.stringify({ a: false, b: false, c: false, d: false, e: false, f: false, g: false, h: false })}
             dragging={true}
           ></SevenSegmentDisplay>
         );
@@ -793,7 +792,7 @@ class BreadBoard extends React.Component {
             selected={false}
             x={this.components_coords.get(this.state.new_component.id).x}
             y={this.components_coords.get(this.state.new_component.id).y}
-            inputs={{ a: false, b: false }}
+            inputs={JSON.stringify({ a: false, b: false })}
             dragging={true}
           ></AndGate>
         );

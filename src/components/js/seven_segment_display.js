@@ -2,7 +2,7 @@ import "../css/seven_segment_display.css";
 import React, { useState, useEffect, useRef, useCallback} from "react";
 
 const SevenSegmentDisplay = React.memo((props) => {
-
+  
   // Destructure props and set initial state using useState
   const {
     new_component = false,
@@ -33,7 +33,7 @@ const SevenSegmentDisplay = React.memo((props) => {
     selected,
     opacity,
     rotation,
-    segments,
+    segments: JSON.parse(segments),
     zoom,
     offset
   });
@@ -122,16 +122,18 @@ const SevenSegmentDisplay = React.memo((props) => {
         selected: selected,
       }));
     }
-    if(JSON.stringify(segments) !== JSON.stringify(state.segments)){
+    if(segments !== JSON.stringify(state.segments)){
       setState((prevState) => ({
         ...prevState,
-        segments: segments,
+        segments: JSON.parse(segments),
       }));
     }
     if(zoom !== state.zoom){
       setState((prevState) => ({
         ...prevState,
-        zoom: zoom
+        zoom: zoom,
+        diffX: state.diffX * (zoom / state.zoom),
+        diffY: state.diffY * (zoom / state.zoom)
       }));
     }
     if(offset !== state.offset){
