@@ -22,7 +22,7 @@ class ToolBar extends React.Component{
     render(){
         return(
             <div className="toolbar">
-                <Undo className="toolbar-icon toolbar_active_btn"></Undo>
+                <Undo className="toolbar-icon"></Undo>
                 <Redo className="toolbar-icon toolbar_borderright"></Redo>
                 <Copy className="toolbar-icon"></Copy>
                 <Paste className="toolbar-icon"></Paste>
@@ -34,10 +34,10 @@ class ToolBar extends React.Component{
                 <ZoomIn className="toolbar-icon toolbar_borderleft zoomin-btn toolbar_active_btn"></ZoomIn>
                 <ZoomOut className="toolbar-icon toolbar_borderright zoomout-btn toolbar_active_btn"></ZoomOut>
                 <Select className="toolbar-icon"></Select>
-                <SelectArea className="toolbar-icon toolbar_active_btn"></SelectArea>
-                <MoveHand className="toolbar-icon toolbar_active_btn"></MoveHand>
-                <AnnotAdd className="toolbar-icon toolbar_borderleft toolbar_active_btn"></AnnotAdd>
-                <AnnotVisibility className="toolbar-icon toolbar_borderright toolbar_active_btn"></AnnotVisibility>
+                <SelectArea className="toolbar-icon"></SelectArea>
+                <MoveHand className="toolbar-icon"></MoveHand>
+                <AnnotAdd className="toolbar-icon toolbar_borderleft"></AnnotAdd>
+                <AnnotVisibility className="toolbar-icon toolbar_borderright"></AnnotVisibility>
             </div>
         );
     }

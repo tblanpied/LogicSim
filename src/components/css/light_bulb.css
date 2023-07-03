@@ -1,0 +1,7 @@
+.LightBulb .IO{
+    opacity: 0;
+}
+
+.LightBulb .IO:hover{
+    opacity: 100;
+}

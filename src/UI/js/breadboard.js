@@ -6,6 +6,8 @@ import PushButton from "../../components/js/push_button";
 import AndGate from "../../components/js/and_gate";
 import NotGate from "../../components/js/not_gate";
 import { config } from '../../config';
+import LightBulb from "../../components/js/light_bulb";
+import Switch from "../../components/js/switch";
 
 class BreadBoard extends React.Component {
   constructor(props) {
@@ -69,6 +71,12 @@ class BreadBoard extends React.Component {
 
       const notgate = document.getElementsByClassName("component_picker_item item-NOTgate")[0];
       notgate.addEventListener("click", (e) => { this.addNewComponent(e, "notgate") });
+
+      const lightbulb = document.getElementsByClassName("component_picker_item item-Lightbulb")[0];
+      lightbulb.addEventListener("click", (e) => { this.addNewComponent(e, "lightbulb") });
+
+      const _switch = document.getElementsByClassName("component_picker_item item-Switch")[0];
+      _switch.addEventListener("click", (e) => { this.addNewComponent(e, "switch") });
 
       // Add event listener to the delete button
       // Trigger deleteComponent method when clicked
@@ -255,6 +263,10 @@ class BreadBoard extends React.Component {
       } else if (name === "notgate") {
         outputs.push(Object.assign({}, { state: false, connections: [] }));
         inputs.push(Object.assign({}, { state: false, connections: [] }));
+      } else if (name === "lightbulb") {
+        inputs.push(Object.assign({}, { state: false, connections: [] }));
+      } else if (name === "switch") {
+        outputs.push(Object.assign({}, { state: false, connections: [] }));
       }
 
       // Generate a unique ID for the new component
@@ -412,7 +424,6 @@ class BreadBoard extends React.Component {
     });
 
     // Add event listeners for wire drawing
-    document.addEventListener("mousedown", this.addWirePoint, { capture: true });
     document.addEventListener("contextmenu", this.stopDrawingWire);
   }
 
@@ -429,8 +440,6 @@ class BreadBoard extends React.Component {
       e.stopPropagation();
 
       // Remove event listeners for wire drawing
-      document.removeEventListener("mousedown", this.addWirePoint, { capture: true });
-      document.removeEventListener("mousemove", this.drawWire);
       document.removeEventListener("contextmenu", this.stopDrawingWire);
 
       // Calculate the center coordinates of the component
@@ -489,11 +498,11 @@ class BreadBoard extends React.Component {
    * Adds a new point to the wire drawing process.
    * @param {Event} e - The event object.
    */
-  addWirePoint(e) {
-    if (e.button === 0) {
+  addWirePoint(e, x, y) {
+    if (e.button === 0 && this.state.drawingWire) {
       var drawingWirePoints = [...this.state.drawingWirePoints];
-      drawingWirePoints[drawingWirePoints.length - 1].x = (e.pageX - this.state.offset.x) / this.state.zoom;
-      drawingWirePoints[drawingWirePoints.length - 1].y = (e.pageY - this.state.offset.y) / this.state.zoom;
+      drawingWirePoints[drawingWirePoints.length - 1].x = x;
+      drawingWirePoints[drawingWirePoints.length - 1].y = y;
       drawingWirePoints.push({ x: (e.pageX - this.state.offset.x) / this.state.zoom, y: (e.pageY - this.state.offset.y) / this.state.zoom });
       this.setState({
         drawingWirePoints: drawingWirePoints
@@ -507,8 +516,7 @@ class BreadBoard extends React.Component {
    */
   stopDrawingWire(e) {
     e.preventDefault();
-    document.removeEventListener("mousedown", this.addWirePoint, { capture: true });
-    document.removeEventListener("contextmenu", this.stopDrawingWire, { capture: true });
+    document.removeEventListener("contextmenu", this.stopDrawingWire);
     this.setState({
       drawingWirePoints: [],
       drawingWire: false
@@ -711,6 +719,39 @@ class BreadBoard extends React.Component {
             input={this.state.components[i].inputs[0].state}
           ></NotGate>
         );
+      } else if (this.state.components[i].type === "lightbulb") {
+        components.push(
+          <LightBulb
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            onStateChange={this.changeComponentOutputState}
+            StartEndWire={this.startEndWire}
+            id={this.state.components[i].id}
+            key={this.state.components[i].id}
+            setCoord={this.setComponentCoord}
+            onClick={this.selectComponent}
+            selected={this.state.selectedComponentId === this.state.components[i].id}
+            x={this.components_coords.get(this.state.components[i].id).x}
+            y={this.components_coords.get(this.state.components[i].id).y}
+            input={this.state.components[i].inputs[0].state}
+          ></LightBulb>
+        );
+      } else if (this.state.components[i].type === "switch") {
+        components.push(
+          <Switch
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            onStateChange={this.changeComponentOutputState}
+            StartEndWire={this.startEndWire}
+            id={this.state.components[i].id}
+            key={this.state.components[i].id}
+            setCoord={this.setComponentCoord}
+            onClick={this.selectComponent}
+            selected={this.state.selectedComponentId === this.state.components[i].id}
+            x={this.components_coords.get(this.state.components[i].id).x}
+            y={this.components_coords.get(this.state.components[i].id).y}
+          ></Switch>
+        );
       }
     }
   
@@ -718,6 +759,7 @@ class BreadBoard extends React.Component {
     for (let i = 0; i < this.state.wires.length; i++) {
       wires.push(
         <Wire
+          drawing={false}
           offset={this.state.offset}
           zoom={this.state.zoom}
           updateWirePoint={this.updateWirePoint}
@@ -816,6 +858,43 @@ class BreadBoard extends React.Component {
             dragging={true}
           ></NotGate>
         );
+      } else if (this.state.new_component.type === "lightbulb") {
+        components.push(
+          <LightBulb
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            opacity={0.5}
+            new_component={true}
+            onStateChange={this.changeComponentOutputState}
+            id={this.state.new_component.id}
+            key={this.state.new_component.id}
+            setCoord={this.setComponentCoord}
+            onClick={() => { this.addComponent("lightbulb") }}
+            selected={false}
+            x={this.components_coords.get(this.state.new_component.id).x}
+            y={this.components_coords.get(this.state.new_component.id).y}
+            input={false}
+            dragging={true}
+          ></LightBulb>
+        );
+      } else if (this.state.new_component.type === "switch") {
+        new_component.push(
+          <Switch
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            opacity={0.5}
+            new_component={true}
+            onStateChange={this.changeComponentOutputState}
+            id={this.state.new_component.id}
+            key={this.state.new_component.id}
+            setCoord={this.setComponentCoord}
+            onClick={() => { this.addComponent("switch") }}
+            selected={false}
+            x={this.components_coords.get(this.state.new_component.id).x}
+            y={this.components_coords.get(this.state.new_component.id).y}
+            dragging={true}
+          ></Switch>
+        );
       }
     }
   
@@ -823,6 +902,8 @@ class BreadBoard extends React.Component {
     if (this.state.drawingWire) {
       drawingWire.push(
         <Wire
+          drawing={true}
+          addWirePoint={this.addWirePoint}
           offset={this.state.offset}
           zoom={this.state.zoom}
           style={{ pointerEvents: "none" }}

@@ -15,10 +15,12 @@ class SideBar extends React.Component{
             },
             styles_btn: {
                 transform: "scaleX(1)"
-            }
+            },
+            search_component: ""
         };
 
         this._click = this._click.bind(this);
+        this.searchComponent = this.searchComponent.bind(this);
     }
 
     _click(){
@@ -46,12 +48,19 @@ class SideBar extends React.Component{
         }
     }
 
+    searchComponent(component){
+        this.setState({
+            search_component: component
+        });
+    }
+
     render(){
+
         return(
             <div style={this.state.styles_sidebar} className="sidebar">
                 <ComponentPickerGroup></ComponentPickerGroup>
-                <ComponentPickerSearch></ComponentPickerSearch>
-                <ComponentPicker></ComponentPicker>
+                <ComponentPickerSearch searchComponent={this.searchComponent}></ComponentPickerSearch>
+                <ComponentPicker search={this.state.search_component}></ComponentPicker>
                 <button onClick={this._click} className="open_close_sidebar_btn">
                     <ArrowLeft style={this.state.styles_btn}></ArrowLeft>
                 </button>

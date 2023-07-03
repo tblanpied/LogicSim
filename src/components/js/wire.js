@@ -7,7 +7,7 @@ const Wire = React.memo((props) => {
   // Destructure props
   const {
     points: propsPoints,
-    dragging: propsDragging,
+    drawing: propsDrawing,
     point_dragged: propsPointDragged,
     selected: propsSelected,
     active: propsActive,
@@ -18,6 +18,7 @@ const Wire = React.memo((props) => {
     offset: propsOffset,
     onStateChange,
     updateWirePoint,
+    addWirePoint,
     onClick,
     id,
   } = props;
@@ -25,7 +26,8 @@ const Wire = React.memo((props) => {
   // Set initial state using useState
   const [state, setState] = useState({
     points: propsPoints,
-    dragging: propsDragging !== undefined ? propsDragging : false,
+    dragging: false,
+    drawing: propsDrawing != undefined ? propsDrawing : false,
     point_dragged: propsPointDragged !== undefined ? propsPointDragged : null,
     selected: propsSelected,
     active: propsActive === undefined ? false : propsActive,
@@ -43,10 +45,17 @@ const Wire = React.memo((props) => {
   stateRef.current = state;
 
   useEffect(() => {
-    if(state.dragging){
-      document.addEventListener("mousemove", dragging);
+    if(state.drawing){
+      setState((prevState) => ({
+        ...prevState,
+        dragging: true
+      }));
+      // Add event listeners for wire drawing
+      document.addEventListener("mousemove", _dragging);
+      document.addEventListener("mousedown", addPoint, { capture: true });
       return () => {
-        document.removeEventListener('mousemove', dragging);
+        document.removeEventListener('mousemove', _dragging);
+        document.removeEventListener("mousedown", addPoint, { capture: true });
       }
     }
     // eslint-disable-next-line
@@ -196,18 +205,20 @@ const Wire = React.memo((props) => {
   // Event handler for dragging start
   const dragStart = useCallback((e, i) => {
     e.stopPropagation();
-    setState((prevState) => ({
-      ...prevState,
-      dragging: true,
-      point_dragged: i
-    }));
-    document.addEventListener("mousemove", dragging);
-    document.addEventListener("mouseup", dragEnd);
+    if(i !== 0 && i !== stateRef.current.points.length - 1){
+      setState((prevState) => ({
+        ...prevState,
+        dragging: true,
+        point_dragged: i
+      }));
+      document.addEventListener("mousemove", _dragging);
+      document.addEventListener("mouseup", dragEnd);
+    }
     // eslint-disable-next-line
   }, []);
 
   // Event handler for dragging
-  const dragging = useCallback((e) => {
+  const _dragging = useCallback((e) => {
     if (stateRef.current.dragging) {
       let points = [...stateRef.current.points];
       let point = { ...points[stateRef.current.point_dragged] };
@@ -229,10 +240,15 @@ const Wire = React.memo((props) => {
       point_dragged: null
     }));
     updateWirePoint(id, stateRef.current.point_dragged, stateRef.current.points[stateRef.current.point_dragged].x, stateRef.current.points[stateRef.current.point_dragged].y);
-    document.removeEventListener("mousemove", dragging);
+    document.removeEventListener("mousemove", _dragging);
     document.removeEventListener("mouseup", dragEnd);
     // eslint-disable-next-line
   }, []);
+
+  // Function used to add point when clicked and give this point to the parent
+  const addPoint = (e) => {
+    addWirePoint(e, stateRef.current.points[stateRef.current.point_dragged].x, stateRef.current.points[stateRef.current.point_dragged].y);
+  };
 
   // ComponentDidUpdate
   useEffect(() => {
@@ -290,9 +306,9 @@ const Wire = React.memo((props) => {
         dragging: props.dragging
       }));
       if(props.dragging){
-        document.addEventListener("mousemove", dragging);
+        document.addEventListener("mousemove", _dragging);
       } else {
-        document.removeEventListener("mousemove", dragging);
+        document.removeEventListener("mousemove", _dragging);
       }
     }
     // eslint-disable-next-line

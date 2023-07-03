@@ -1,5 +1,5 @@
 import "../css/push_button.css";
-import React, { useState, useEffect, useRef, useCallback} from "react";
+import React, { useState, useEffect, useRef, useCallback } from "react";
 
 const PushButton = React.memo((props) => {
   // Destructure props and set initial state using useState
@@ -125,7 +125,7 @@ const PushButton = React.memo((props) => {
         selected: selected,
       }));
     }
-    if(zoom !== state.zoom){
+    if (zoom !== state.zoom) {
       setState((prevState) => ({
         ...prevState,
         zoom: zoom,
@@ -133,7 +133,7 @@ const PushButton = React.memo((props) => {
         diffY: state.diffY * (zoom / state.zoom)
       }));
     }
-    if(offset !== state.offset){
+    if (offset !== state.offset) {
       setState((prevState) => ({
         ...prevState,
         offset: offset
@@ -163,62 +163,76 @@ const PushButton = React.memo((props) => {
     }
     // eslint-disable-next-line
   }, []);
-
   return (
     <g
       opacity={state.opacity}
       onMouseDown={dragStart}
       className={"Component-pushbutton-" + id}
       transform={`translate(${state.position.x},${state.position.y}) rotate(${state.rotation})`}
-      width="137"
+      width="132"
       height="86"
-      viewBox="0 0 137 86"
+      viewBox="0 0 132 86"
       fill="none"
     >
       <g className="PushButton">
         <path
           opacity={state.selected ? 1 : 0}
           className="select-border"
-          fillRule="evenodd"
+          fillRule="evenodd" 
           clipRule="evenodd"
-          d="M81.3069 48C77.7897 66.7843 61.305 81 41.5 81C19.1325 81 1 62.8675 1 40.5C1 18.1325 19.1325 0 41.5 0C61.6549 0 78.3712 14.7226 81.4812 34H102.412C105.143 27.5361 111.542 23 119 23C128.941 23 137 31.0589 137 41C137 50.9411 128.941 59 119 59C111.542 59 105.143 54.4639 102.412 48H81.3069Z"
-          fill="#0A9DFF"
+          d="M81.1065 49C77.201 67.2865 60.952 81 41.5 81C19.1325 81 1 62.8675 1 40.5C1 18.1325 19.1325 0 41.5 0C61.305 0 77.7897 14.2157 81.3069 33H119C123.418 33 127 36.5817 127 41C127 45.4183 123.418 49 119 49H81.1065Z"
+          fill="#0A9DFF" 
         />
-        <path className="Line" d="M41 41H119" stroke="black" strokeWidth="8" strokeLinecap="round" />
-        <g className="button" filter="url(#filter0_d_3_2)">
+        <path 
+          className="Line" 
+          d="M41 41H119" 
+          stroke="black" 
+          strokeWidth="10" 
+          strokeLinecap="round" 
+        />
+        <g 
+          className="button" 
+          filter="url(#filter0_d_108_11)"
+        >
           <circle
             onMouseDown={_buttonPress}
             onMouseUp={_buttonRelease}
-            cx="41.5"
-            cy="40.5"
-            r="37.5"
+            cx="41.5" 
+            cy="40.5" 
+            r="37.5" 
             fill={state.active ? "#ea2828" : "#531F21"}
           />
-          <circle cx="41.5" cy="40.5" r="35" stroke="black" strokeWidth="5" />
+          <circle 
+            cx="41.5" 
+            cy="40.5" 
+            r="35" 
+            stroke="black" 
+            strokeWidth="5" 
+          />
         </g>
         <circle
           onMouseDown={(e) => {
             StartEndWire(e, id, "pushbutton", 0, "output");
           }}
-          className="IO Out-0"
-          cx="119"
-          cy="41"
-          r="12.5"
-          fill="black"
-          stroke="black"
-          strokeWidth="5"
+          className="IO Out-0" 
+          cx="119" 
+          cy="41" 
+          r="11" 
+          fill="#FF0000" 
+          stroke="black" 
+          strokeWidth="4" 
         />
       </g>
       <defs>
-        <filter id="filter0_d_3_2" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
+        <filter className="filter0_d_108_11" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">
           <feFlood floodOpacity="0" result="BackgroundImageFix" />
           <feColorMatrix in="SourceAlpha" type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 127 0" result="hardAlpha" />
           <feOffset dy="4" />
           <feGaussianBlur stdDeviation="2" />
           <feComposite in2="hardAlpha" operator="out" />
           <feColorMatrix type="matrix" values="0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0 0.25 0" />
-          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_3_2" />
-          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_3_2" result="shape" />
+          <feBlend mode="normal" in2="BackgroundImageFix" result="effect1_dropShadow_108_11" />
+          <feBlend mode="normal" in="SourceGraphic" in2="effect1_dropShadow_108_11" result="shape" />
         </filter>
       </defs>
     </g>

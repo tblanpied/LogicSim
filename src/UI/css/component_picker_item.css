@@ -5,6 +5,9 @@
     cursor: pointer;
     margin: 6px 4px;
     padding: 4px 4px;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 46%;
 }
 
 #light .component_picker_item{

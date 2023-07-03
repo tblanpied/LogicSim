@@ -1,3 +1,7 @@
+.PushButton .IO{
+    opacity: 0;
+}
+
 .PushButton .IO:hover{
-    fill: white;
+    opacity: 100;
 }

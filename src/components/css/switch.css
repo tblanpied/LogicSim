@@ -1,0 +1,16 @@
+
+.Switch .IO{
+    opacity: 0;
+}
+
+.Switch .IO:hover{
+    opacity: 100;
+}
+
+.Switch .Body{
+    transition: 0.4s fill;
+}
+
+.Switch .Ellipse{
+    transition: 0.4s;
+}

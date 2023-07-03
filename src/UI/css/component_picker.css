@@ -1,12 +1,12 @@
 .component_picker{
     position: relative;
     height: calc(100% - 116px);
-    display: grid;
+    display: block;
     grid-template-columns: 1fr 1fr;
     overflow-x: hidden;
     overflow-y: scroll;
     direction: rtl;
-    padding: 0px 8px 0px 8px;
+    padding: 0px 8px 0px 4px;
 }
 
 #light .component_picker{
