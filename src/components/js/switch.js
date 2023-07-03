@@ -166,10 +166,11 @@ const Switch = React.memo((props) => {
             fill="none"
         >
             <g className="Switch">
-                <rect className="Rectangle 9"  x="169" y="35" width="35" height="10" rx="5" fill={state.selected ? "#0A9DFF" :"black"} />
-                <rect className="Body" x="2.5" y="2.5" width="170" height="75" rx="37.5" fill={state.active ? "#1E701C" : "#AA2424"} stroke={state.selected ? "#0A9DFF" :"black"} strokeWidth="5" />
-                <circle className="Ellipse 9" onMouseDown={toggleSwitch} cx={state.active ? "135" : "40"} cy="40" r="27.5" fill="#C9C9C9" stroke="#979797" strokeWidth="5" />
-                <circle className="IO Out-0" onMouseDown={(e) => { StartEndWire(e, id, "switch", 0, "output") }} cx="199.5" cy="39.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
+                <path className={`select-border ${state.selected ? "" : "display-none"}`} d="M35.5 0C15.8939 0 0 15.8939 0 35.5C0 55.1061 15.8939 71 35.5 71H114.5C131.176 71 145.167 59.5013 148.976 44H171C175.418 44 179 40.4183 179 36C179 31.5817 175.418 28 171 28H149.206C145.764 11.9958 131.533 0 114.5 0H35.5Z" fill="#0A9DFF" />
+                <rect className="Rectangle 11" x="141" y="31" width="35" height="10" rx="5" fill="black" />
+                <rect className="Body" x="5.5" y="5.5" width="139" height="60" rx="30" fill={state.active ? "#1E701C" : "#AA2424"} stroke="black" strokeWidth="5" />
+                <circle className="Button" onMouseDown={toggleSwitch}  cx={state.active ? "114.5" : "35.5"} cy="35.5" r="21" fill="#D2D2D2" stroke="#A4A4A4" strokeWidth="5" />
+                <circle className="IO Out-0" onMouseDown={(e) => { StartEndWire(e, id, "switch", 0, "output") }} cx="171.5" cy="35.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4" />
             </g>
         </g>
     );

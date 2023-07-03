@@ -149,13 +149,13 @@ const SevenSegmentDisplay = React.memo((props) => {
       <g opacity={state.opacity} onMouseDown={dragStart} transform={"translate(" + state.position.x + "," + state.position.y + ") rotate(" + state.rotation + ")"} className={"Component-7segmentdisplay-" + id.toString()}>
         <g className="SevenSegmentDisplay">
           <rect
+            className={`select-border ${state.selected ? "" : "display-none"}`}
             x="-4.5"
             y="-4.5"
             width="249"
             height="324"
             rx="13"
             fill="#0A9DFF"
-            fillOpacity={state.selected ? 1 : 0}
           />
           <rect
             className="base"

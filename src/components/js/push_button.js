@@ -176,8 +176,7 @@ const PushButton = React.memo((props) => {
     >
       <g className="PushButton">
         <path
-          opacity={state.selected ? 1 : 0}
-          className="select-border"
+          className={`select-border ${state.selected ? "" : "display-none"}`}
           fillRule="evenodd" 
           clipRule="evenodd"
           d="M81.1065 49C77.201 67.2865 60.952 81 41.5 81C19.1325 81 1 62.8675 1 40.5C1 18.1325 19.1325 0 41.5 0C61.305 0 77.7897 14.2157 81.3069 33H119C123.418 33 127 36.5817 127 41C127 45.4183 123.418 49 119 49H81.1065Z"

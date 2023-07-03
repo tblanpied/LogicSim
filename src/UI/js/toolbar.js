@@ -27,8 +27,8 @@ class ToolBar extends React.Component{
                 <Copy className="toolbar-icon"></Copy>
                 <Paste className="toolbar-icon"></Paste>
                 <Delete className="toolbar-icon delete-btn"></Delete>
-                <RotateLeft className="toolbar-icon toolbar_borderleft"></RotateLeft>
-                <RotateRight className="toolbar-icon toolbar_borderright"></RotateRight>
+                <RotateLeft className="toolbar-icon rotate-left-btn toolbar_borderleft"></RotateLeft>
+                <RotateRight className="toolbar-icon rotate-right-btn toolbar_borderright"></RotateRight>
                 <FlipHorizontal className="toolbar-icon"></FlipHorizontal>
                 <FlipVertical className="toolbar-icon"></FlipVertical>
                 <ZoomIn className="toolbar-icon toolbar_borderleft zoomin-btn toolbar_active_btn"></ZoomIn>

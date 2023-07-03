@@ -3,7 +3,6 @@ import Header from "./UI/js/header";
 import { createContext, useState } from "react";
 import ToolBar from "./UI/js/toolbar";
 import SideBar from "./UI/js/sidebar";
-import SevenSegmentDisplay from "./components/js/seven_segment_display";
 import BreadBoard from "./UI/js/breadboard";
 
 export const ThemeContext = createContext(null);
@@ -14,6 +13,7 @@ function App() {
   const toggleTheme = () => {
     setTheme((curr) => (curr === "light" ? "dark" : "light"));
   };
+
   return (
     <ThemeContext.Provider value={{theme, toggleTheme}}>
       <div className="App" id={theme}>

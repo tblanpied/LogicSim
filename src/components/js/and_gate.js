@@ -11,7 +11,7 @@ const AndGate = React.memo((props) => {
     y,
     selected,
     opacity = 1,
-    rotation = 0,
+    rotation,
     inputs,
     zoom,
     offset,
@@ -34,7 +34,7 @@ const AndGate = React.memo((props) => {
     diffY: 53 * zoom,
     selected,
     opacity,
-    rotation,
+    rotation: rotation !== undefined ? rotation : 0,
     inputs: JSON.parse(inputs),
     zoom,
     offset,
@@ -80,10 +80,20 @@ const AndGate = React.memo((props) => {
         start_position.current.x = e.pageX;
         start_position.current.y = e.pageY;
         const rect = e.currentTarget.getBoundingClientRect();
+        var diff;
+        if(stateRef.current.rotation == 0){
+          diff = {x: e.pageX - rect.left, y: e.pageY - rect.top};
+        } else if(stateRef.current.rotation == 90){
+          diff = {x: e.pageX - rect.right, y: e.pageY - rect.top};
+        } else if(stateRef.current.rotation == 180){
+          diff = {x: e.pageX - rect.right, y: e.pageY - rect.bottom};
+        } else if(stateRef.current.rotation == 270){
+          diff = {x: e.pageX - rect.left, y: e.pageY - rect.bottom};
+        }
         setState((prevState) => ({
           ...prevState,
-          diffX: e.pageX - rect.left,
-          diffY: e.pageY - rect.top,
+          diffX: diff.x,
+          diffY: diff.y,
           dragging: true,
         }));
         // Add event listeners for dragging
@@ -105,12 +115,8 @@ const AndGate = React.memo((props) => {
       setState((prevState) => ({
         ...prevState,
         position: {
-          x:
-            (e.pageX - stateRef.current.diffX - stateRef.current.offset.x) /
-            stateRef.current.zoom,
-          y:
-            (e.pageY - stateRef.current.diffY - stateRef.current.offset.y) /
-            stateRef.current.zoom,
+          x: (e.pageX - stateRef.current.diffX - stateRef.current.offset.x) / stateRef.current.zoom,
+          y: (e.pageY - stateRef.current.diffY - stateRef.current.offset.y) / stateRef.current.zoom,
         },
       }));
     }
@@ -173,8 +179,14 @@ const AndGate = React.memo((props) => {
         offset: offset,
       }));
     }
+    if(rotation !== undefined && rotation !== state.rotation){
+      setState((prevState) => ({
+        ...prevState,
+        rotation: rotation
+      }));
+    }
     // eslint-disable-next-line
-  }, [selected, inputs, zoom, offset]);
+  }, [selected, inputs, zoom, offset, rotation]);
 
   return (
     <g
@@ -189,8 +201,7 @@ const AndGate = React.memo((props) => {
     >
       <g className="AndGate">
         <g 
-          opacity={state.selected?1:0} 
-          className="select-border"
+          className={`select-border ${state.selected ? "" : "display-none"}`}
         >
           <rect 
             className="Rectangle 7" 

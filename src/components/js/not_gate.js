@@ -188,8 +188,7 @@ const NotGate = React.memo((props) => {
     >
       <g className="NotGate">
         <g 
-          opacity={state.selected?1:0} 
-          className="select-border"
+          className={`select-border ${state.selected ? "" : "display-none"}`}
         >
           <path 
             className="Polygon 2" 

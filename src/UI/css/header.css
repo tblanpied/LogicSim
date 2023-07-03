@@ -23,7 +23,22 @@
 }
 
 .logicsim-logo {
-    position: relative;
+    margin-left: 10px;
     left: 10px;
     height: 40px;
+    width: 150px;
+}
+
+.App-header .version{
+    margin-left: 5px;
+    padding-top: 10px;
+    font-size: 0.8em;
+}
+
+#light .App-header .version{
+    color: dimgray;
+}
+
+#dark .App-header .version{
+    color:darkgrey;
 }

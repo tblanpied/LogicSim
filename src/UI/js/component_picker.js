@@ -31,9 +31,7 @@ class ComponentPicker extends React.Component{
     render(){
         var componentsItems = []
         for(let i = 0; i < this.components.length; i++){
-            if(this.components[i].name.toLowerCase().includes(this.state.search.toLowerCase())){
-                componentsItems.push(<ComponentPickerItem key={i} name={this.components[i].name} icon={this.components[i].icon}></ComponentPickerItem>);
-            }
+            componentsItems.push(<ComponentPickerItem display={this.components[i].name.toLowerCase().includes(this.state.search.toLowerCase())} key={i} name={this.components[i].name} icon={this.components[i].icon}></ComponentPickerItem>);
         }
         return(
             <div className="component_picker">

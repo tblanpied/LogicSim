@@ -83,6 +83,12 @@ class BreadBoard extends React.Component {
       const delete_button = document.getElementsByClassName("delete-btn")[0];
       delete_button.addEventListener("click", (e) => { this.deleteComponent() });
 
+      const rotate_left_button = document.getElementsByClassName("rotate-left-btn")[0];
+      rotate_left_button.addEventListener("click", (e) => { this.rotateComponent(-90) });
+
+      const rotate_right_button = document.getElementsByClassName("rotate-right-btn")[0];
+      rotate_right_button.addEventListener("click", (e) => { this.rotateComponent(90) });
+
       // Add event listener to the zoomin button
       // Trigger zoom method when clicked
       const zoomin_button = document.getElementsByClassName("zoomin-btn")[0];
@@ -148,6 +154,25 @@ class BreadBoard extends React.Component {
 
     // Add the active class to the delete button in the toolbar
     document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
+    document.getElementsByClassName("rotate-left-btn")[0].classList.add("toolbar_active_btn");
+    document.getElementsByClassName("rotate-right-btn")[0].classList.add("toolbar_active_btn");
+  }
+
+  rotateComponent(angle){
+    this.setState({
+      components: this.state.components.map((c, i) => {
+        if(c.id === this.state.selectedComponentId){
+          c.attributes.rotation += angle;
+          if(c.attributes.rotation < 0){
+            c.attributes.rotation += 360;
+          }
+          if(c.attributes.rotation >= 360){
+            c.attributes.rotation -= 360;
+          }
+        }
+        return c;
+      })
+    });
   }
 
   // handleBreadboardClick: Handle the click event on the breadboard
@@ -157,6 +182,8 @@ class BreadBoard extends React.Component {
       selectedComponentId: null
     });
     document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
+    document.getElementsByClassName("rotate-left-btn")[0].classList.remove("toolbar_active_btn");
+    document.getElementsByClassName("rotate-right-btn")[0].classList.remove("toolbar_active_btn");
 
     if(e.button === 0){
       // Store the initial click position and offset for dragging
@@ -273,7 +300,7 @@ class BreadBoard extends React.Component {
       let id = this.getUniqueId();
 
       // Create a new component object with its type, ID, inputs, and outputs
-      const new_component = { type: name, id: id, inputs: inputs, outputs: outputs };
+      const new_component = { type: name, id: id, inputs: inputs, outputs: outputs, attributes: {rotation: 0} };
 
       // Update the state with the new_component and set its coordinates based on the new_component
       this.setState(prevState => ({
@@ -698,6 +725,7 @@ class BreadBoard extends React.Component {
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
             inputs={JSON.stringify({a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state})}
+            rotation={this.state.components[i].attributes.rotation}
           ></AndGate>
         );
       }

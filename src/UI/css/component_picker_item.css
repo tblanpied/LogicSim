@@ -8,6 +8,7 @@
     display: inline-block;
     box-sizing: border-box;
     width: 46%;
+    /*transition: .2s border-color, .2s background-color ;*/
 }
 
 #light .component_picker_item{

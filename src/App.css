@@ -13,3 +13,14 @@
 #dark {
   background-color: #1E1E1E;
 }
+
+.display-none {
+  display: none;
+}
+
+.notransition *{
+  -webkit-transition: none !important;
+  -moz-transition: none !important;
+  -o-transition: none !important;
+  transition: none !important;
+}
