@@ -40,6 +40,9 @@ const AndGate = React.memo((props) => {
     offset,
   });
 
+  /*const width = 206;
+  const height = 106;*/
+
   const [outputState, setOutputState] = useState(false);
 
   const start_position = useRef({ x: 0, y: 0 });
@@ -80,6 +83,7 @@ const AndGate = React.memo((props) => {
         start_position.current.x = e.pageX;
         start_position.current.y = e.pageY;
         const rect = e.currentTarget.getBoundingClientRect();
+
         var diff;
         if(stateRef.current.rotation == 0){
           diff = {x: e.pageX - rect.left, y: e.pageY - rect.top};

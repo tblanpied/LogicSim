@@ -32,7 +32,7 @@ const LightBulb = React.memo((props) => {
         diffY: 95 * zoom,
         selected,
         opacity,
-        rotation,
+        rotation: rotation !== undefined ? rotation : 0,
         zoom,
         offset,
         input
@@ -72,11 +72,22 @@ const LightBulb = React.memo((props) => {
                 start_position.current.x = e.pageX;
                 start_position.current.y = e.pageY;
                 const rect = e.currentTarget.getBoundingClientRect();
+
+                var diff;
+                if(stateRef.current.rotation == 0){
+                    diff = {x: e.pageX - rect.left, y: e.pageY - rect.top};
+                } else if(stateRef.current.rotation == 90){
+                    diff = {x: e.pageX - rect.right, y: e.pageY - rect.top};
+                } else if(stateRef.current.rotation == 180){
+                    diff = {x: e.pageX - rect.right, y: e.pageY - rect.bottom};
+                } else if(stateRef.current.rotation == 270){
+                    diff = {x: e.pageX - rect.left, y: e.pageY - rect.bottom};
+                }
                 setState((prevState) => ({
                     ...prevState,
-                    diffX: e.pageX - rect.left,
-                    diffY: e.pageY - rect.top,
-                    dragging: true
+                    diffX: diff.x,
+                    diffY: diff.y,
+                    dragging: true,
                 }));
                 document.addEventListener("mousemove", _dragging);
                 document.addEventListener("mouseup", dragEnd);
@@ -145,8 +156,14 @@ const LightBulb = React.memo((props) => {
                 input: input
             }));
         }
+        if(rotation !== undefined && rotation !== state.rotation){
+            setState((prevState) => ({
+              ...prevState,
+              rotation: rotation
+            }));
+        }
         // eslint-disable-next-line
-    }, [selected, zoom, offset, input]);
+    }, [selected, zoom, offset, input, rotation]);
 
     return (
         <g

@@ -35,6 +35,10 @@ class BreadBoard extends React.Component {
     this.test = true;                    // Test flag
     this.dragging_start_pos = { x: 0, y: 0 };        // Starting position of the breadboard drag
     this.dragging_start_offset = { x: 0, y: 0 };     // Starting offset of the breadboard drag
+    this.copied_component = null;
+    this.pasting = false;
+
+    this.cursor = {x:0, y: 0};
   
     // Bind methods to the component instance
     this.selectComponent = this.selectComponent.bind(this);
@@ -52,6 +56,7 @@ class BreadBoard extends React.Component {
     this.updateWirePoint = this.updateWirePoint.bind(this);
     this.dragging = this.dragging.bind(this);
     this.dragEnd = this.dragEnd.bind(this);
+    this.onKeyDown = this.onKeyDown.bind(this);
   }
 
   // componentDidMount: Lifecycle method called after the component is mounted in the DOM
@@ -61,22 +66,22 @@ class BreadBoard extends React.Component {
       // Add event listeners to component picker items
       // Trigger addNewComponent method with the corresponding component type
       const sevensegdisplay = document.getElementsByClassName("component_picker_item item-7segmentdisplay")[0];
-      sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent(e, "7segmentdisplay") });
+      sevensegdisplay.addEventListener("click", (e) => { this.addNewComponent("7segmentdisplay", 0, window.screen.height) });
 
       const pushbutton = document.getElementsByClassName("component_picker_item item-pushbutton")[0];
-      pushbutton.addEventListener("click", (e) => { this.addNewComponent(e, "pushbutton") });
+      pushbutton.addEventListener("click", (e) => { this.addNewComponent("pushbutton", 0, window.screen.height) });
 
       const andgate = document.getElementsByClassName("component_picker_item item-ANDgate")[0];
-      andgate.addEventListener("click", (e) => { this.addNewComponent(e, "andgate") });
+      andgate.addEventListener("click", (e) => { this.addNewComponent("andgate", 0, window.screen.height) });
 
       const notgate = document.getElementsByClassName("component_picker_item item-NOTgate")[0];
-      notgate.addEventListener("click", (e) => { this.addNewComponent(e, "notgate") });
+      notgate.addEventListener("click", (e) => { this.addNewComponent("notgate", 0, window.screen.height) });
 
       const lightbulb = document.getElementsByClassName("component_picker_item item-Lightbulb")[0];
-      lightbulb.addEventListener("click", (e) => { this.addNewComponent(e, "lightbulb") });
+      lightbulb.addEventListener("click", (e) => { this.addNewComponent("lightbulb", 0, window.screen.height) });
 
       const _switch = document.getElementsByClassName("component_picker_item item-Switch")[0];
-      _switch.addEventListener("click", (e) => { this.addNewComponent(e, "switch") });
+      _switch.addEventListener("click", (e) => { this.addNewComponent("switch", 0, window.screen.height) });
 
       // Add event listener to the delete button
       // Trigger deleteComponent method when clicked
@@ -89,6 +94,12 @@ class BreadBoard extends React.Component {
       const rotate_right_button = document.getElementsByClassName("rotate-right-btn")[0];
       rotate_right_button.addEventListener("click", (e) => { this.rotateComponent(90) });
 
+      const copy_button = document.getElementsByClassName("copy-btn")[0];
+      copy_button.addEventListener("click", (e) => { this.copySelectedComponent() });
+
+      const paste_button = document.getElementsByClassName("paste-btn")[0];
+      paste_button.addEventListener("mouseup", (e) => { this.pasteComponent() });
+
       // Add event listener to the zoomin button
       // Trigger zoom method when clicked
       const zoomin_button = document.getElementsByClassName("zoomin-btn")[0];
@@ -99,12 +110,12 @@ class BreadBoard extends React.Component {
       const zoomout_button = document.getElementsByClassName("zoomout-btn")[0];
       zoomout_button.addEventListener("click", (e) => { this.zoom(e, -1, 5, window.screen.width / 2, window.screen.height / 2) });
 
-      // Register keydown event to delete components
-      document.onkeydown = this.deleteComponent;
-
       // Add wheel event listener to the breadboard for zooming
       const breadboard = document.getElementsByClassName("breadboard")[0];
       breadboard.addEventListener("wheel", (e) => { this.zoom(e, e.deltaY, 1, e.pageX, e.pageY) });
+
+      document.addEventListener("keydown", this.onKeyDown);
+      document.addEventListener("mousemove", (e) => {this.cursor.x = e.pageX; this.cursor.y = e.pageY;});
 
       // Set test flag to false to prevent reinitialization
       this.test = false;
@@ -156,6 +167,7 @@ class BreadBoard extends React.Component {
     document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
     document.getElementsByClassName("rotate-left-btn")[0].classList.add("toolbar_active_btn");
     document.getElementsByClassName("rotate-right-btn")[0].classList.add("toolbar_active_btn");
+    document.getElementsByClassName("copy-btn")[0].classList.add("toolbar_active_btn");
   }
 
   rotateComponent(angle){
@@ -175,6 +187,40 @@ class BreadBoard extends React.Component {
     });
   }
 
+  copySelectedComponent(){
+    if(this.state.selectedComponentId !== null){
+      this.copied_component = this.state.selectedComponentId;
+      document.getElementsByClassName("paste-btn")[0].classList.add("toolbar_active_btn");
+    }
+  }
+
+  pasteComponent(){
+    if(this.copied_component !== null){
+      var component_name = "";
+      for(let i = 0; i < this.state.components.length; i++){
+        if(this.state.components[i].id === this.copied_component){
+          component_name = this.state.components[i].type;
+        }
+      }
+      var component = document.getElementsByClassName("Component-" + component_name + "-" + this.copied_component)[0];
+      var rect = component.getBoundingClientRect();
+      this.addNewComponent(component_name, this.cursor.x - rect.width/2, this.cursor.y - rect.height/2);
+      this.pasting = true;
+    }
+  }
+
+  onKeyDown(e){
+    if(!e.repeat){
+      if(e.key === "Delete"){
+        this.deleteComponent();
+      } else if(e.key === "c" && e.ctrlKey){
+        this.copySelectedComponent();
+      } else if(e.key === "v" && e.ctrlKey){
+        this.pasteComponent();
+      }
+    }
+  }
+
   // handleBreadboardClick: Handle the click event on the breadboard
   handleBreadboardClick(e) {
     // Clear the selected component and remove the active class from the delete button
@@ -184,6 +230,7 @@ class BreadBoard extends React.Component {
     document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
     document.getElementsByClassName("rotate-left-btn")[0].classList.remove("toolbar_active_btn");
     document.getElementsByClassName("rotate-right-btn")[0].classList.remove("toolbar_active_btn");
+    document.getElementsByClassName("copy-btn")[0].classList.remove("toolbar_active_btn");
 
     if(e.button === 0){
       // Store the initial click position and offset for dragging
@@ -235,7 +282,7 @@ class BreadBoard extends React.Component {
   }
 
   // addNewComponent: Add a new component to the state and set its initial coordinates
-  addNewComponent(e, name) {
+  addNewComponent(name, x, y) {
     // Generate a unique ID for the new component
     let id = this.getUniqueId();
 
@@ -246,7 +293,7 @@ class BreadBoard extends React.Component {
     this.setState({
       new_component: new_component
     });
-    this.setComponentCoord(id, (-this.state.offset.x) / this.state.zoom, (window.screen.height - this.state.offset.y) / this.state.zoom);
+    this.setComponentCoord(id, (x - this.state.offset.x ) / this.state.zoom, (y - this.state.offset.y) / this.state.zoom);
 
     // Add a context menu event listener to delete the new component
     document.addEventListener("contextmenu", this.delNewComponent);
@@ -254,8 +301,9 @@ class BreadBoard extends React.Component {
 
   // delNewComponent: Delete the new component and remove the context menu event listener
   delNewComponent(e) {
-    e.preventDefault();
-
+    if(e !== null){
+      e.preventDefault();
+    }
     // Remove the context menu event listener
     document.removeEventListener("contextmenu", this.delNewComponent);
  
@@ -307,6 +355,11 @@ class BreadBoard extends React.Component {
         components: [...prevState.components, new_component]
       }));
       this.setComponentCoord(id, this.components_coords.get(this.state.new_component.id).x, this.components_coords.get(this.state.new_component.id).y);
+
+      if(this.pasting){
+        this.pasting = false;
+        this.delNewComponent(null);
+      }
     }
   }
 
@@ -339,6 +392,11 @@ class BreadBoard extends React.Component {
         return false;
       });
 
+      if(this.state.selectedComponentId === this.copied_component){
+        this.copied_component = null;
+        document.getElementsByClassName("paste-btn")[0].classList.remove("toolbar_active_btn");
+      }
+
       // Delete the associated wires and update the state
       this.setState({
         components: components,
@@ -351,6 +409,9 @@ class BreadBoard extends React.Component {
 
       // Remove the active class from the delete button in the toolbar
       document.getElementsByClassName("delete-btn")[0].classList.remove("toolbar_active_btn");
+      document.getElementsByClassName("rotate-left-btn")[0].classList.remove("toolbar_active_btn");
+      document.getElementsByClassName("rotate-right-btn")[0].classList.remove("toolbar_active_btn");
+      document.getElementsByClassName("copy-btn")[0].classList.remove("toolbar_active_btn");
     }
   }
 
@@ -688,6 +749,7 @@ class BreadBoard extends React.Component {
               g: this.state.components[i].inputs[6].state,
               h: this.state.components[i].inputs[7].state
             })}
+            rotation={this.state.components[i].attributes.rotation}
           ></SevenSegmentDisplay>
         );
       }
@@ -706,6 +768,7 @@ class BreadBoard extends React.Component {
             selected={this.state.selectedComponentId === this.state.components[i].id}
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
+            rotation={this.state.components[i].attributes.rotation}
           ></PushButton>
         );
       }
@@ -745,6 +808,7 @@ class BreadBoard extends React.Component {
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
             input={this.state.components[i].inputs[0].state}
+            rotation={this.state.components[i].attributes.rotation}
           ></NotGate>
         );
       } else if (this.state.components[i].type === "lightbulb") {
@@ -762,6 +826,7 @@ class BreadBoard extends React.Component {
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
             input={this.state.components[i].inputs[0].state}
+            rotation={this.state.components[i].attributes.rotation}
           ></LightBulb>
         );
       } else if (this.state.components[i].type === "switch") {
@@ -778,6 +843,7 @@ class BreadBoard extends React.Component {
             selected={this.state.selectedComponentId === this.state.components[i].id}
             x={this.components_coords.get(this.state.components[i].id).x}
             y={this.components_coords.get(this.state.components[i].id).y}
+            rotation={this.state.components[i].attributes.rotation}
           ></Switch>
         );
       }

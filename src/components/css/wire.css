@@ -1,9 +1,17 @@
-#light .wire-background{
-    opacity: 0.0;
+.wire-background{
+    display: none;
 }
 
-#dark .wire-background{
-    opacity: 0.0;
+#light .wire-hover:hover{
+    filter: drop-shadow(0px 0px 6px #0000ffda);
+}
+
+#dark .wire-hover:hover{
+    filter: drop-shadow(0px 0px 6px #6c6cff);
+}
+
+.wire-hover{
+    transition: 0.1s;
 }
 
 #light .wire-background-selected{
@@ -12,6 +20,6 @@
 }
 
 #dark .wire-background-selected{
-    stroke: #4747ff;
-    opacity: 0.5;
+    stroke: #6c6cff;
+    opacity: 0.4;
 }

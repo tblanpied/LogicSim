@@ -33,7 +33,7 @@ const NotGate = React.memo((props) => {
     diffY: 75 * zoom,
     selected,
     opacity,
-    rotation,
+    rotation: rotation !== undefined ? rotation : 0,
     input,
     zoom,
     offset,
@@ -80,10 +80,21 @@ const NotGate = React.memo((props) => {
         start_position.current.x = e.pageX;
         start_position.current.y = e.pageY;
         const rect = e.currentTarget.getBoundingClientRect();
+
+        var diff;
+        if(stateRef.current.rotation == 0){
+          diff = {x: e.pageX - rect.left, y: e.pageY - rect.top};
+        } else if(stateRef.current.rotation == 90){
+          diff = {x: e.pageX - rect.right, y: e.pageY - rect.top};
+        } else if(stateRef.current.rotation == 180){
+          diff = {x: e.pageX - rect.right, y: e.pageY - rect.bottom};
+        } else if(stateRef.current.rotation == 270){
+          diff = {x: e.pageX - rect.left, y: e.pageY - rect.bottom};
+        }
         setState((prevState) => ({
           ...prevState,
-          diffX: e.pageX - rect.left,
-          diffY: e.pageY - rect.top,
+          diffX: diff.x,
+          diffY: diff.y,
           dragging: true,
         }));
         // Add event listeners for dragging
@@ -172,8 +183,14 @@ const NotGate = React.memo((props) => {
         offset: offset,
       }));
     }
+    if(rotation !== undefined && rotation !== state.rotation){
+      setState((prevState) => ({
+        ...prevState,
+        rotation: rotation
+      }));
+    }
     // eslint-disable-next-line
-  }, [selected, input, zoom, offset]);
+  }, [selected, input, zoom, offset, rotation]);
 
   return (
     <g

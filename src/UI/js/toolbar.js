@@ -24,8 +24,8 @@ class ToolBar extends React.Component{
             <div className="toolbar">
                 <Undo className="toolbar-icon"></Undo>
                 <Redo className="toolbar-icon toolbar_borderright"></Redo>
-                <Copy className="toolbar-icon"></Copy>
-                <Paste className="toolbar-icon"></Paste>
+                <Copy className="toolbar-icon copy-btn"></Copy>
+                <Paste className="toolbar-icon paste-btn"></Paste>
                 <Delete className="toolbar-icon delete-btn"></Delete>
                 <RotateLeft className="toolbar-icon rotate-left-btn toolbar_borderleft"></RotateLeft>
                 <RotateRight className="toolbar-icon rotate-right-btn toolbar_borderright"></RotateRight>

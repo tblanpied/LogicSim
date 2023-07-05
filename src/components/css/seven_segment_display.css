@@ -1,5 +1,21 @@
-.SevenSegmentDisplay .IO:hover .center{
-    fill: white;
+.SevenSegmentDisplay .IO{
+    opacity: 0;
+}
+
+.SevenSegmentDisplay .IO:hover{
+    opacity: 1;
+}
+
+.SevenSegmentDisplay .segment-selected{
+    fill: #dfdfdf;
+    filter: drop-shadow(0px 0px 4px #dfdfdf);;
+}
+
+.input-name{
+    width: 100px;
+    height: 50px;
+    background-color: blue;
+    position: relative;
 }
 
 .segment-active{

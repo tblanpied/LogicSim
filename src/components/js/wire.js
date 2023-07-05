@@ -256,7 +256,7 @@ const Wire = React.memo((props) => {
     if (props.selected !== state.selected) {
       setState((prevState) => ({
         ...prevState,
-        selected: props.selected,
+        selected: props.selected
       }));
     }
 
@@ -515,7 +515,7 @@ const Wire = React.memo((props) => {
   }
 
   return (
-    <g className="wire" style={state.style}>
+    <g className={"wire" + (state.selected ? "" : " wire-hover")} style={state.style}>
       <path
         className={"snap-line"}
         d={snap_data}

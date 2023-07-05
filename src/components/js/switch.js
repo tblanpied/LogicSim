@@ -29,11 +29,11 @@ const Switch = React.memo((props) => {
             x: parseInt(x),
             y: parseInt(y),
         },
-        diffX: 37 * zoom,
-        diffY: 40 * zoom,
+        diffX: 64 * zoom,
+        diffY: 55 * zoom,
         selected,
         opacity,
-        rotation,
+        rotation: rotation !== undefined ? rotation : 0,
         zoom,
         offset
     });
@@ -72,11 +72,22 @@ const Switch = React.memo((props) => {
                 start_position.current.x = e.pageX;
                 start_position.current.y = e.pageY;
                 const rect = e.currentTarget.getBoundingClientRect();
+
+                var diff;
+                if (stateRef.current.rotation == 0) {
+                    diff = { x: e.pageX - rect.left, y: e.pageY - rect.top };
+                } else if (stateRef.current.rotation == 90) {
+                    diff = { x: e.pageX - rect.right, y: e.pageY - rect.top };
+                } else if (stateRef.current.rotation == 180) {
+                    diff = { x: e.pageX - rect.right, y: e.pageY - rect.bottom };
+                } else if (stateRef.current.rotation == 270) {
+                    diff = { x: e.pageX - rect.left, y: e.pageY - rect.bottom };
+                }
                 setState((prevState) => ({
                     ...prevState,
-                    diffX: e.pageX - rect.left,
-                    diffY: e.pageY - rect.top,
-                    dragging: true
+                    diffX: diff.x,
+                    diffY: diff.y,
+                    dragging: true,
                 }));
                 document.addEventListener("mousemove", _dragging);
                 document.addEventListener("mouseup", dragEnd);
@@ -139,8 +150,14 @@ const Switch = React.memo((props) => {
                 offset: offset
             }));
         }
+        if (rotation !== undefined && rotation !== state.rotation) {
+            setState((prevState) => ({
+                ...prevState,
+                rotation: rotation
+            }));
+        }
         // eslint-disable-next-line
-    }, [selected, zoom, offset]);
+    }, [selected, zoom, offset, rotation]);
 
     const toggleSwitch = useCallback((e) => {
         if (!stateRef.current.new_component) {
@@ -166,13 +183,17 @@ const Switch = React.memo((props) => {
             fill="none"
         >
             <g className="Switch">
-                <path className={`select-border ${state.selected ? "" : "display-none"}`} d="M35.5 0C15.8939 0 0 15.8939 0 35.5C0 55.1061 15.8939 71 35.5 71H114.5C131.176 71 145.167 59.5013 148.976 44H171C175.418 44 179 40.4183 179 36C179 31.5817 175.418 28 171 28H149.206C145.764 11.9958 131.533 0 114.5 0H35.5Z" fill="#0A9DFF" />
-                <rect className="Rectangle 11" x="141" y="31" width="35" height="10" rx="5" fill="black" />
-                <rect className="Body" x="5.5" y="5.5" width="139" height="60" rx="30" fill={state.active ? "#1E701C" : "#AA2424"} stroke="black" strokeWidth="5" />
-                <circle className="Button" onMouseDown={toggleSwitch}  cx={state.active ? "114.5" : "35.5"} cy="35.5" r="21" fill="#D2D2D2" stroke="#A4A4A4" strokeWidth="5" />
-                <circle className="IO Out-0" onMouseDown={(e) => { StartEndWire(e, id, "switch", 0, "output") }} cx="171.5" cy="35.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4" />
+                <path className={`select-border ${state.selected ? "" : "display-none"}`} d="M13 0C5.8203 0 0 5.8203 0 13V103C0 110.18 5.8203 116 13 116H83C90.1797 116 96 110.18 96 103V66H117C121.418 66 125 62.4183 125 58C125 53.5817 121.418 50 117 50H96V13C96 5.8203 90.1797 0 83 0H13Z" fill="#0A9DFF" />
+                <rect className="Output-rectangle" x="87" y="53" width="35" height="10" rx="5" fill="black" />
+                <circle className="IO Out-0" onMouseDown={(e) => { StartEndWire(e, id, "switch", 0, "output") }} cx="117.5" cy="57.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4" />
+                <rect className="Body-exter" x="5.5" y="5.5" width="85" height="105" rx="7.5" fill="#FFC806" stroke="black" strokeWidth="5" />
+                <rect className="Body-inter" x="20.5" y="20.5" width="55" height="75" rx="7.5" fill={state.active?"#2BCE3B":"#D52B2B"} stroke="black" strokeWidth="5" />
+                <path className={"Button-side-top" + (state.active?" display-none":"")} onMouseDown={toggleSwitch} d="M28.372 26.5L25.672 35.5H70.328L67.628 26.5H28.372Z" fill="#B3B3B3" stroke="black" />
+                <path className={"Button-side-bottom" + (state.active?"":" display-none")} onMouseDown={toggleSwitch} d="M28.372 89.5L25.672 80.5H70.328L67.628 89.5H28.372Z" fill="#B3B3B3" stroke="black" />
+                <path className="Button-top-top" onMouseDown={toggleSwitch} d={"M28.4365 57.5L" + (state.active?"28.4364":"25.5728") + (state.active?" 26.5":" 36.5") + "H" + (state.active?"67.5636":"70.4272") + "L67.5636 57.5H28.4365Z"} fill="#E8E8E8" stroke="black" />
+                <path className="Button-top-bottom" onMouseDown={toggleSwitch} d={"M28.4364 58.5L" + (state.active?"25.5728":"28.4364") + (state.active?" 79.5": " 89.5") + "H" + (state.active?"70.4272":"67.5636") + "L67.5636 58.5H28.4364Z"} fill="#E8E8E8" stroke="black" />
             </g>
-        </g>
+        </g >
     );
 });
 
