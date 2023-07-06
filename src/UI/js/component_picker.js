@@ -16,7 +16,8 @@ class ComponentPicker extends React.Component{
             {name: "AND gate", icon: "/icons/icon-AndGate.png"},
             {name: "NOT gate", icon: "/icons/icon-NotGate.png"},
             {name: "Light bulb", icon: "/icons/icon-LightBulb.png"},
-            {name: "Switch", icon: "/icons/icon-Switch.png"}
+            {name: "Switch", icon: "/icons/icon-Switch.png"},
+            {name: "Clock", icon: "/icons/icon-Clock.png"}
         ];
     }
 

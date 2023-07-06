@@ -97,7 +97,7 @@ const SevenSegmentDisplay = React.memo((props) => {
   }, []);
 
   const _dragging = useCallback((e) => {
-    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY)) {
+    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY) && stateRef.current.selected || stateRef.current.new_component) {
       setState((prevState) => ({
         ...prevState,
         position: {
@@ -195,8 +195,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-0" onMouseEnter={(e) => {handleHover(e, "In-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 0, "input");}} cx="13" cy="33" r="11" fill="#FF0000" stroke="black" strokeWidth="4"/>
           {state.input_hovered === "In-0" && (
           <g>
-            <rect x="-26" y="23" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="39"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">a</text>
+            <rect x="-26" y="23" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="39"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">a</text>
           </g>
           )}
         </g>
@@ -204,8 +204,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-1" onMouseEnter={(e) => {handleHover(e, "In-1")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 1, "input");}} cx="13" cy="68" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-1" && (
           <g>
-            <rect x="-26" y="58" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="76"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">b</text>
+            <rect x="-26" y="58" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="76"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">b</text>
           </g>
           )}
         </g>
@@ -213,8 +213,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-2" onMouseEnter={(e) => {handleHover(e, "In-2")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 2, "input");}} cx="13" cy="103" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-2" && (
           <g>
-            <rect x="-26" y="93" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="109"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">c</text>
+            <rect x="-26" y="93" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="109"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">c</text>
           </g>
           )}
         </g>
@@ -222,8 +222,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-3" onMouseEnter={(e) => {handleHover(e, "In-3")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 3, "input");}} cx="13" cy="138" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-3" && (
           <g>
-            <rect x="-26" y="128" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="146"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">d</text>
+            <rect x="-26" y="128" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="146"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">d</text>
           </g>
           )}
         </g>
@@ -231,8 +231,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-4" onMouseEnter={(e) => {handleHover(e, "In-4")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 4, "input");}} cx="13" cy="173" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-4" && (
           <g>
-            <rect x="-26" y="163" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="179"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">e</text>
+            <rect x="-26" y="163" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="179"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">e</text>
           </g>
           )}
         </g>
@@ -240,8 +240,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-5" onMouseEnter={(e) => {handleHover(e, "In-5")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 5, "input");}} cx="13" cy="208" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-5" && (
           <g>
-            <rect x="-26" y="198" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-20" y="216"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">f</text>
+            <rect x="-26" y="198" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="216"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">f</text>
           </g>
           )}
         </g>
@@ -249,8 +249,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-6" onMouseEnter={(e) => {handleHover(e, "In-6")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 6, "input");}} cx="13" cy="243" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-6" && (
           <g>
-            <rect x="-26" y="233" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="247"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">g</text>
+            <rect x="-26" y="233" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="247"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">g</text>
           </g>
           )}
         </g>
@@ -258,8 +258,8 @@ const SevenSegmentDisplay = React.memo((props) => {
           <circle className="IO In-7" onMouseEnter={(e) => {handleHover(e, "In-7")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "7segmentdisplay", 7, "input");}} cx="13" cy="278" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
           {state.input_hovered === "In-7" && (
           <g>
-            <rect x="-26" y="268" width="20" height="21" fill="rgba(0, 0, 0, 0.5)" />
-            <text x="-21.5" y="285"  fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">h</text>
+            <rect x="-26" y="268" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-22" y="286"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">h</text>
           </g>
           )}
         </g>
@@ -271,7 +271,7 @@ const SevenSegmentDisplay = React.memo((props) => {
         <path className={"segment-c" + (state.segments.c ? " segment-active" : "") + (state.input_hovered === "In-2"?" segment-selected":"")} d="M196.196 156.5H206.457L197.519 264.754L191.037 270.31L175.517 253.819L182.482 169.234L196.196 156.5Z" fill="#7D7D7D" stroke="black" />
         <path className={"segment-g" + (state.segments.g ? " segment-active" : "") + (state.input_hovered === "In-6"?" segment-selected":"")} d="M189.324 151.97L177.847 163.5L93.2212 163.5L83.6907 153.016L96.2071 140.5L179.766 140.5L189.324 151.97Z" fill="#7D7D7D" stroke="black" />
         <path className={"segment-b" + (state.segments.b ? " segment-active" : "") + (state.input_hovered === "In-1"?" segment-selected":"")} d="M196.219 148.5L206.545 148.5L216.478 42.2156L211.031 37.6765L193.478 55.2296L184.522 135.828L196.219 148.5Z" fill="#7D7D7D" stroke="black" />
-        <circle className={"segment-h" + (state.segments.b ? " segment-active" : "") + (state.input_hovered === "In-7"?" segment-selected":"")} cx="223" cy="274" r="9.5" fill="#7D7D7D" stroke="black" />
+        <circle className={"segment-h" + (state.segments.h ? " segment-active" : "") + (state.input_hovered === "In-7"?" segment-selected":"")} cx="223" cy="274" r="9.5" fill="#7D7D7D" stroke="black" />
       </g>
     </g>
   );

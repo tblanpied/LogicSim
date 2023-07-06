@@ -8,6 +8,7 @@ import NotGate from "../../components/js/not_gate";
 import { config } from '../../config';
 import LightBulb from "../../components/js/light_bulb";
 import Switch from "../../components/js/switch";
+import Clock from "../../components/js/clock";
 
 class BreadBoard extends React.Component {
   constructor(props) {
@@ -24,7 +25,8 @@ class BreadBoard extends React.Component {
       zoom: 1.0,                         // Zoom level of the app
       offset: { x: 0, y: 0 },            // Offset of the breadboard
       dragging: false,                   // Flag indicating if the breadboard is being dragged
-      dragging_offset: { x: 0, y: 0 }
+      dragging_offset: { x: 0, y: 0 },
+      selected_tool: "select"
     };
   
     // Additional instance variables
@@ -57,6 +59,7 @@ class BreadBoard extends React.Component {
     this.dragging = this.dragging.bind(this);
     this.dragEnd = this.dragEnd.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
+    this.changeTool = this.changeTool.bind(this);
   }
 
   // componentDidMount: Lifecycle method called after the component is mounted in the DOM
@@ -83,6 +86,9 @@ class BreadBoard extends React.Component {
       const _switch = document.getElementsByClassName("component_picker_item item-Switch")[0];
       _switch.addEventListener("click", (e) => { this.addNewComponent("switch", 0, window.screen.height) });
 
+      const clock = document.getElementsByClassName("component_picker_item item-Clock")[0];
+      clock.addEventListener("click", (e) => { this.addNewComponent("clock", 0, window.screen.height) });
+
       // Add event listener to the delete button
       // Trigger deleteComponent method when clicked
       const delete_button = document.getElementsByClassName("delete-btn")[0];
@@ -98,7 +104,16 @@ class BreadBoard extends React.Component {
       copy_button.addEventListener("click", (e) => { this.copySelectedComponent() });
 
       const paste_button = document.getElementsByClassName("paste-btn")[0];
-      paste_button.addEventListener("mouseup", (e) => { this.pasteComponent() });
+      paste_button.addEventListener("click", (e) => { this.pasteComponent() });
+
+      const select_button = document.getElementsByClassName("select-tool-btn")[0];
+      select_button.addEventListener("click", (e) => { this.changeTool("select") });
+
+      const select_area_button = document.getElementsByClassName("select-area-tool-btn")[0];
+      select_area_button.addEventListener("click", (e) => { this.changeTool("select area") });
+
+      const hand_button = document.getElementsByClassName("hand-tool-btn")[0];
+      hand_button.addEventListener("click", (e) => { this.changeTool("move") });
 
       // Add event listener to the zoomin button
       // Trigger zoom method when clicked
@@ -120,6 +135,31 @@ class BreadBoard extends React.Component {
       // Set test flag to false to prevent reinitialization
       this.test = false;
     } 
+  }
+
+  changeTool(tool){
+    if(this.state.selected_tool !== tool){
+      this.setState({
+        selected_tool: tool
+      })
+      document.getElementsByClassName("select-tool-btn")[0].classList.add("toolbar_active_btn");
+      document.getElementsByClassName("select-area-tool-btn")[0].classList.add("toolbar_active_btn");
+      document.getElementsByClassName("hand-tool-btn")[0].classList.add("toolbar_active_btn");
+      const breadboard = document.getElementsByClassName("breadboard")[0];
+      if(tool === "select"){
+        document.getElementsByClassName("select-tool-btn")[0].classList.remove("toolbar_active_btn");
+        breadboard.removeEventListener("mousedown", this.handleBreadboardClick, {capture: true});
+      } else if(tool === "select area"){
+        document.getElementsByClassName("select-area-tool-btn")[0].classList.remove("toolbar_active_btn");
+      } else if(tool === "move"){
+        document.getElementsByClassName("hand-tool-btn")[0].classList.remove("toolbar_active_btn");
+        breadboard.removeEventListener("mousedown", this.handleBreadboardClick, {capture: true});
+        this.setState({
+          selectedComponentId: null
+        });
+        breadboard.addEventListener("mousedown", this.handleBreadboardClick, {capture: true});
+      }
+    }
   }
 
   // zoom: Handle the zooming functionality based on the scroll event
@@ -159,32 +199,36 @@ class BreadBoard extends React.Component {
 
   // selectComponent: Set the selected component ID and add the active class to the delete button
   selectComponent(id) {
-    this.setState({
-      selectedComponentId: id
-    });
-
-    // Add the active class to the delete button in the toolbar
-    document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
-    document.getElementsByClassName("rotate-left-btn")[0].classList.add("toolbar_active_btn");
-    document.getElementsByClassName("rotate-right-btn")[0].classList.add("toolbar_active_btn");
-    document.getElementsByClassName("copy-btn")[0].classList.add("toolbar_active_btn");
+    if(this.state.selected_tool === "select"){
+      this.setState({
+        selectedComponentId: id
+      });
+  
+      // Add the active class to the delete button in the toolbar
+      document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
+      document.getElementsByClassName("rotate-left-btn")[0].classList.add("toolbar_active_btn");
+      document.getElementsByClassName("rotate-right-btn")[0].classList.add("toolbar_active_btn");
+      document.getElementsByClassName("copy-btn")[0].classList.add("toolbar_active_btn");
+    }
   }
 
   rotateComponent(angle){
-    this.setState({
-      components: this.state.components.map((c, i) => {
-        if(c.id === this.state.selectedComponentId){
-          c.attributes.rotation += angle;
-          if(c.attributes.rotation < 0){
-            c.attributes.rotation += 360;
+    if(this.state.selectedComponentId !== null){
+      this.setState({
+        components: this.state.components.map((c, i) => {
+          if(c.id === this.state.selectedComponentId){
+            c.attributes.rotation += angle;
+            if(c.attributes.rotation < 0){
+              c.attributes.rotation += 360;
+            }
+            if(c.attributes.rotation >= 360){
+              c.attributes.rotation -= 360;
+            }
           }
-          if(c.attributes.rotation >= 360){
-            c.attributes.rotation -= 360;
-          }
-        }
-        return c;
-      })
-    });
+          return c;
+        })
+      });
+    }
   }
 
   copySelectedComponent(){
@@ -232,7 +276,7 @@ class BreadBoard extends React.Component {
     document.getElementsByClassName("rotate-right-btn")[0].classList.remove("toolbar_active_btn");
     document.getElementsByClassName("copy-btn")[0].classList.remove("toolbar_active_btn");
 
-    if(e.button === 0){
+    if(e.button === 0 && this.state.selected_tool !== "select area"){
       // Store the initial click position and offset for dragging
       this.dragging_start_pos.x = e.pageX;
       this.dragging_start_pos.y = e.pageY;
@@ -282,21 +326,23 @@ class BreadBoard extends React.Component {
   }
 
   // addNewComponent: Add a new component to the state and set its initial coordinates
-  addNewComponent(name, x, y) {
-    // Generate a unique ID for the new component
-    let id = this.getUniqueId();
+  addNewComponent(name, x, y) { 
+    if(this.state.selected_tool === "select"){
+      // Generate a unique ID for the new component
+      let id = this.getUniqueId();
 
-    // Create a new component object with its type and ID
-    const new_component = { type: name, id: id };
+      // Create a new component object with its type and ID
+      const new_component = { type: name, id: id };
 
-    // Update the state with the new_component and set its initial coordinates
-    this.setState({
-      new_component: new_component
-    });
-    this.setComponentCoord(id, (x - this.state.offset.x ) / this.state.zoom, (y - this.state.offset.y) / this.state.zoom);
+      // Update the state with the new_component and set its initial coordinates
+      this.setState({
+        new_component: new_component
+      });
+      this.setComponentCoord(id, (x - this.state.offset.x ) / this.state.zoom, (y - this.state.offset.y) / this.state.zoom);
 
-    // Add a context menu event listener to delete the new component
-    document.addEventListener("contextmenu", this.delNewComponent);
+      // Add a context menu event listener to delete the new component
+      document.addEventListener("contextmenu", this.delNewComponent);
+    }
   }
 
   // delNewComponent: Delete the new component and remove the context menu event listener
@@ -341,6 +387,8 @@ class BreadBoard extends React.Component {
       } else if (name === "lightbulb") {
         inputs.push(Object.assign({}, { state: false, connections: [] }));
       } else if (name === "switch") {
+        outputs.push(Object.assign({}, { state: false, connections: [] }));
+      } else if (name === "clock") {
         outputs.push(Object.assign({}, { state: false, connections: [] }));
       }
 
@@ -478,10 +526,12 @@ class BreadBoard extends React.Component {
    * @param {string} IO - The input/output type ("input" or "output").
    */
   startEndWire(e, id, type, index, IO) {
-    if (this.state.drawingWire) {
-      this.endWire(e, id, type, index, IO);
-    } else {
-      this.startWire(e, id, type, index, IO);
+    if(e.button === 0 && this.state.selected_tool === "select"){
+      if (this.state.drawingWire) {
+        this.endWire(e, id, type, index, IO);
+      } else {
+        this.startWire(e, id, type, index, IO);
+      }
     }
   }
 
@@ -526,6 +576,12 @@ class BreadBoard extends React.Component {
   endWire(e, id, type, index, IO) {
     if (this.state.drawingWire) {
       e.stopPropagation();
+
+      // Delete the wire when connecting an input to an input or an output to an output
+      if(IO === this.component_start_wire.IO){
+        this.stopDrawingWire(e);
+        return;
+      }
 
       // Remove event listeners for wire drawing
       document.removeEventListener("contextmenu", this.stopDrawingWire);
@@ -846,6 +902,23 @@ class BreadBoard extends React.Component {
             rotation={this.state.components[i].attributes.rotation}
           ></Switch>
         );
+      } else if (this.state.components[i].type === "clock") {
+        components.push(
+          <Clock
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            onStateChange={this.changeComponentOutputState}
+            StartEndWire={this.startEndWire}
+            id={this.state.components[i].id}
+            key={this.state.components[i].id}
+            setCoord={this.setComponentCoord}
+            onClick={this.selectComponent}
+            selected={this.state.selectedComponentId === this.state.components[i].id}
+            x={this.components_coords.get(this.state.components[i].id).x}
+            y={this.components_coords.get(this.state.components[i].id).y}
+            rotation={this.state.components[i].attributes.rotation}
+          ></Clock>
+        );
       }
     }
   
@@ -989,6 +1062,24 @@ class BreadBoard extends React.Component {
             dragging={true}
           ></Switch>
         );
+      } else if (this.state.new_component.type === "clock") {
+        new_component.push(
+          <Clock
+            offset={this.state.offset}
+            zoom={this.state.zoom}
+            opacity={0.5}
+            new_component={true}
+            onStateChange={this.changeComponentOutputState}
+            id={this.state.new_component.id}
+            key={this.state.new_component.id}
+            setCoord={this.setComponentCoord}
+            onClick={() => { this.addComponent("clock") }}
+            selected={false}
+            x={this.components_coords.get(this.state.new_component.id).x}
+            y={this.components_coords.get(this.state.new_component.id).y}
+            dragging={true}
+          ></Clock>
+        );
       }
     }
   
@@ -1015,9 +1106,18 @@ class BreadBoard extends React.Component {
         ></Wire>
       );
     }
+
+    var cursor = "default";
+    if(this.state.selected_tool === "move"){
+      if(this.state.dragging){
+        cursor = "grabbing";
+      } else {
+        cursor = "grab";
+      }
+    }
   
     return (
-      <div className="breadboard" onMouseDown={this.handleBreadboardClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
+      <div className="breadboard" style={{cursor: cursor}}onMouseDown={this.handleBreadboardClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
         <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
           <g transform={"translate(" + (this.state.dragging ? this.state.dragging_offset.x : this.state.offset.x) + "," + (this.state.dragging ? this.state.dragging_offset.y : this.state.offset.y) + ") scale(" + this.state.zoom + ")"}>
             {components}

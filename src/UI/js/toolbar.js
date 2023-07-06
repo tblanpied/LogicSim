@@ -33,9 +33,9 @@ class ToolBar extends React.Component{
                 <FlipVertical className="toolbar-icon"></FlipVertical>
                 <ZoomIn className="toolbar-icon toolbar_borderleft zoomin-btn toolbar_active_btn"></ZoomIn>
                 <ZoomOut className="toolbar-icon toolbar_borderright zoomout-btn toolbar_active_btn"></ZoomOut>
-                <Select className="toolbar-icon"></Select>
-                <SelectArea className="toolbar-icon"></SelectArea>
-                <MoveHand className="toolbar-icon"></MoveHand>
+                <Select className="toolbar-icon select-tool-btn"></Select>
+                <SelectArea className="toolbar-icon select-area-tool-btn toolbar_active_btn"></SelectArea>
+                <MoveHand className="toolbar-icon hand-tool-btn toolbar_active_btn"></MoveHand>
                 <AnnotAdd className="toolbar-icon toolbar_borderleft"></AnnotAdd>
                 <AnnotVisibility className="toolbar-icon toolbar_borderright"></AnnotVisibility>
             </div>

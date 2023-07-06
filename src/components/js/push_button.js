@@ -35,7 +35,8 @@ const PushButton = React.memo((props) => {
     opacity,
     rotation: rotation !== undefined ? rotation : 0,
     zoom,
-    offset
+    offset,
+    input_hovered: ""
   });
 
   const start_position = useRef({ x: 0, y: 0 });
@@ -98,7 +99,7 @@ const PushButton = React.memo((props) => {
 
   const _dragging = useCallback((e) => {
     e.stopPropagation();
-    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY)) {
+    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY) && stateRef.current.selected || stateRef.current.new_component) {
       setState((prevState) => ({
         ...prevState,
         position: {
@@ -180,6 +181,21 @@ const PushButton = React.memo((props) => {
     }
     // eslint-disable-next-line
   }, []);
+
+  const handleHover = (e, input) => {
+    setState((prevState) => ({
+      ...prevState,
+      input_hovered: input
+    }));
+  };
+
+  const handleMouseLeave = (e) => {
+    setState((prevState) => ({
+      ...prevState,
+      input_hovered: ""
+    }));
+  };
+
   return (
     <g
       opacity={state.opacity}
@@ -226,18 +242,15 @@ const PushButton = React.memo((props) => {
             strokeWidth="5" 
           />
         </g>
-        <circle
-          onMouseDown={(e) => {
-            StartEndWire(e, id, "pushbutton", 0, "output");
-          }}
-          className="IO Out-0" 
-          cx="119" 
-          cy="41" 
-          r="11" 
-          fill="#FF0000" 
-          stroke="black" 
-          strokeWidth="4" 
-        />
+        <g>
+          <circle className="IO Out-0" onMouseEnter={(e) => {handleHover(e, "Out-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "pushbutton", 0, "output");}} cx="119" cy="41" r="11" fill="#FF0000" stroke="black" strokeWidth="4" />
+          {state.input_hovered === "Out-0" && (
+          <g>
+            <rect x="145" y="30" width="70" height="23" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="147" y="47"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">output</text>
+          </g>
+          )}
+        </g>
       </g>
       <defs>
         <filter className="filter0_d_108_11" x="0" y="3" width="83" height="83" filterUnits="userSpaceOnUse" colorInterpolationFilters="sRGB">

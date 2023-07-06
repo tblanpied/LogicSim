@@ -37,6 +37,7 @@ const NotGate = React.memo((props) => {
     input,
     zoom,
     offset,
+    input_hovered: ""
   });
 
   const [outputState, setOutputState] = useState(true);
@@ -107,11 +108,7 @@ const NotGate = React.memo((props) => {
 
   const _dragging = useCallback((e) => {
     e.stopPropagation();
-    if (
-      stateRef.current.dragging &&
-      (start_position.current.x !== e.pageX ||
-        start_position.current.y !== e.pageY)
-    ) {
+    if (stateRef.current.dragging && (start_position.current.x !== e.pageX || start_position.current.y !== e.pageY) && (stateRef.current.selected || stateRef.current.new_component)) {
       // Update position during dragging
       setState((prevState) => ({
         ...prevState,
@@ -191,6 +188,20 @@ const NotGate = React.memo((props) => {
     }
     // eslint-disable-next-line
   }, [selected, input, zoom, offset, rotation]);
+
+  const handleHover = (e, input) => {
+    setState((prevState) => ({
+      ...prevState,
+      input_hovered: input
+    }));
+  };
+
+  const handleMouseLeave = (e) => {
+    setState((prevState) => ({
+      ...prevState,
+      input_hovered: ""
+    }));
+  };
 
   return (
     <g
@@ -285,16 +296,15 @@ const NotGate = React.memo((props) => {
           d="M77.1359 87.296C77.1359 87.744 76.1332 87.968 74.1279 87.968C72.1225 87.968 71.0345 87.808 70.8639 87.488L65.5199 77.504V87.456C65.5199 87.84 64.5279 88.032 62.5439 88.032C60.5812 88.032 59.5999 87.84 59.5999 87.456V66.048C59.5999 65.728 60.4425 65.568 62.1279 65.568C62.7892 65.568 63.5572 65.632 64.4319 65.76C65.3279 65.8667 65.8719 66.08 66.0639 66.4L71.1839 76.256V66.208C71.1839 65.8027 72.1759 65.6 74.1599 65.6C76.1439 65.6 77.1359 65.8027 77.1359 66.208V87.296ZM89.8539 88.32C86.8672 88.32 84.4245 87.3387 82.5259 85.376C80.6485 83.4133 79.7099 80.5547 79.7099 76.8C79.7099 73.024 80.6592 70.1653 82.5579 68.224C84.4779 66.2827 86.9419 65.312 89.9499 65.312C92.9792 65.312 95.4219 66.272 97.2779 68.192C99.1339 70.0907 100.062 72.9813 100.062 76.864C100.062 80.7253 99.1125 83.6053 97.2139 85.504C95.3152 87.3813 92.8619 88.32 89.8539 88.32ZM89.8859 71.456C88.8619 71.456 87.9979 71.9253 87.2939 72.864C86.6112 73.8027 86.2699 75.1253 86.2699 76.832C86.2699 78.5173 86.6005 79.8187 87.2619 80.736C87.9232 81.632 88.7872 82.08 89.8539 82.08C90.9419 82.08 91.8165 81.6213 92.4779 80.704C93.1605 79.7867 93.5019 78.4747 93.5019 76.768C93.5019 75.0613 93.1499 73.7493 92.4459 72.832C91.7632 71.9147 90.9099 71.456 89.8859 71.456ZM112.263 87.488C112.263 87.9147 111.207 88.128 109.095 88.128C106.983 88.128 105.927 87.9147 105.927 87.488V71.424H102.087C101.724 71.424 101.468 70.9333 101.319 69.952C101.255 69.4827 101.223 69.0027 101.223 68.512C101.223 68.0213 101.255 67.5413 101.319 67.072C101.468 66.0907 101.724 65.6 102.087 65.6H116.007C116.37 65.6 116.626 66.0907 116.775 67.072C116.839 67.5413 116.871 68.0213 116.871 68.512C116.871 69.0027 116.839 69.4827 116.775 69.952C116.626 70.9333 116.37 71.424 116.007 71.424H112.263V87.488Z" 
           fill="black"
         />
-        <circle 
-          onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "output")} } 
-          className="IO Out-0" 
-          cx="184.5" 
-          cy="76.5" 
-          r="11.5" 
-          fill="#FF0000" 
-          stroke="black" 
-          strokeWidth="4"
-        />
+        <g>
+          <circle className="IO Out-0" onMouseEnter={(e) => {handleHover(e, "Out-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "output")} } cx="184.5" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
+          {state.input_hovered === "Out-0" && (
+          <g>
+            <rect x="210" y="63" width="70" height="25" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="213" y="81"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">output</text>
+          </g>
+          )}
+        </g>
         <circle 
           onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "input")} } 
           className="IO In-0" 
@@ -305,6 +315,15 @@ const NotGate = React.memo((props) => {
           stroke="black" 
           strokeWidth="4"
         />
+        <g>
+          <circle className="IO In-0" onMouseEnter={(e) => {handleHover(e, "In-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "input")} }  cx="13.4999" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
+          {state.input_hovered === "In-0" && (
+          <g>
+            <rect x="-78" y="63" width="63" height="25" fill="rgba(0, 0, 0, 0.6)" />
+            <text x="-75" y="82"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">input</text>
+          </g>
+          )}
+        </g>
       </g>
     </g>
     );
