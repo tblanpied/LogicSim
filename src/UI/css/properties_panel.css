@@ -1,0 +1,110 @@
+
+.properties_panel .close-icon{
+    width: 13px;
+    height: 13px;
+}
+
+.properties_panel .close-icon_container{
+    margin-right: 0;
+    margin-left: auto;
+    width: 13px;
+    height: 13px;
+    cursor: pointer;
+}
+
+.properties_panel .close-icon path{
+    stroke: white;
+}
+
+#light .properties_panel{
+    background: #FFFFFF;
+}
+
+#dark .properties_panel{
+    background: #1E1E1E;
+}
+
+.properties_panel{
+    position: absolute;
+    width: 265px;
+    max-height: 500px;
+    border-radius: 4px;
+    border: 2px solid #0085ff;
+    right: 10px;
+    z-index: 10;
+    top: 110px;
+    overflow-y: auto;
+    overflow-x: hidden;
+    font-size: 15px;
+    font-family: sans-serif;
+}
+
+.properties_panel .component_name{
+    color: #ffffff;
+    line-height: 33px;
+    font-weight: 700;
+}
+
+.properties_panel .properties_header{
+    display: flex;
+    align-items: center;
+    background: #0085ff;
+    padding: 0 11px 0 7px;
+    border-bottom: 2px solid #0085ff;
+}
+
+.properties_panel .properties_form {
+    padding: 4px;
+}
+
+.properties_panel .properties_form .property_group{
+    padding: 2px;
+}
+
+.properties_panel .properties_form .property_input_type{
+    box-sizing: border-box;
+    height: 32px;
+    border: 1px solid #0085ff;
+    border-radius: 4px;
+    margin-right: 0;
+}
+
+.properties_panel .properties_form .property_name{
+    background: #0085ff;
+    color: #ffffff;
+    box-sizing: border-box;
+    text-align: center;
+    height: 30px;
+    line-height: 15px;
+    font-size: 15px;
+    font-weight: 700;
+    padding: 7px;
+    min-width: 30px;
+    max-width: 160px;
+    display: table-cell;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+}
+
+.properties_panel .properties_form .property_group .property_input{
+    position: relative;
+    display: table-cell;
+    width: 100%;
+}
+
+.properties_panel .properties_form .property_group .property_input_text{
+    -webkit-box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -ms-box-sizing: border-box;
+    -o-box-sizing: border-box;
+    box-sizing: border-box;
+    height: 28px;
+    border: none;
+    margin: 0;
+    width: 100%;
+    color: #0085ff;
+    font-weight: 700;
+    vertical-align: baseline;
+    padding-left: 7px;
+    background: none;
+}

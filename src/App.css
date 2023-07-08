@@ -24,3 +24,7 @@
   -o-transition: none !important;
   transition: none !important;
 }
+
+input:focus {
+  outline: none;
+}

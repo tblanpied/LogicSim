@@ -362,11 +362,32 @@ const Wire = React.memo((props) => {
       </g>
     );
   }
+
+  // Snap to horizontal or vertical lines when the wire is being drawn
+  if (state.dragging && state.point_dragged !== null && state.point_dragged === state.points.length - 1) {
+    var dxa = state.points[state.point_dragged].x - state.points[state.point_dragged - 1].x;
+    var dya = state.points[state.point_dragged].y - state.points[state.point_dragged - 1].y;
+    //hozizontal
+    if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
+      dya = 0;
+      state.points[state.point_dragged].y = state.points[state.point_dragged - 1].y;
+      snap_data += "M" + (-state.offset.x / state.zoom) + "," + state.points[state.point_dragged].y;
+      snap_data += "L" + (window.screen.width - state.offset.x) / state.zoom + "," + state.points[state.point_dragged].y;
+    }
+    //vertical 
+    if (dxa <= config.wire.snap_range && dxa >= -config.wire.snap_range) {
+      dxa = 0;
+      state.points[state.point_dragged].x = state.points[state.point_dragged - 1].x;
+      snap_data += "M" + state.points[state.point_dragged].x + "," + (-state.offset.y / state.zoom);
+      snap_data += "L" + state.points[state.point_dragged].x + "," + (window.screen.height - state.offset.y) / state.zoom;
+    }
+  }
+
   for (let i = 1; i < state.points.length - 1; i++) {
     // Calculate angles and radius for each curve
     var radius = 20;
-    var dxa = state.points[i].x - state.points[i - 1].x;
-    var dya = state.points[i].y - state.points[i - 1].y;
+    dxa = state.points[i].x - state.points[i - 1].x;
+    dya = state.points[i].y - state.points[i - 1].y;
     var dxb = state.points[i + 1].x - state.points[i].x;
     var dyb = state.points[i + 1].y - state.points[i].y;
 
@@ -461,26 +482,6 @@ const Wire = React.memo((props) => {
           />
         </g>
       );
-    }
-  }
-
-  // Snap to horizontal or vertical lines when the wire is being drawn
-  if (state.dragging && state.point_dragged !== null && state.point_dragged === state.points.length - 1) {
-    dxa = state.points[state.point_dragged].x - state.points[state.point_dragged - 1].x;
-    dya = state.points[state.point_dragged].y - state.points[state.point_dragged - 1].y;
-    //hozizontal
-    if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
-      dya = 0;
-      state.points[state.point_dragged].y = state.points[state.point_dragged - 1].y;
-      snap_data += "M" + (-state.offset.x / state.zoom) + "," + state.points[state.point_dragged].y;
-      snap_data += "L" + (window.screen.width - state.offset.x) / state.zoom + "," + state.points[state.point_dragged].y;
-    }
-    //vertical 
-    if (dxa <= config.wire.snap_range && dxa >= -config.wire.snap_range) {
-      dxa = 0;
-      state.points[state.point_dragged].x = state.points[state.point_dragged - 1].x;
-      snap_data += "M" + state.points[state.point_dragged].x + "," + (-state.offset.y / state.zoom);
-      snap_data += "L" + state.points[state.point_dragged].x + "," + (window.screen.height - state.offset.y) / state.zoom;
     }
   }
 

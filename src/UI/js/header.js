@@ -6,6 +6,7 @@ import {ReactComponent as SunLogo} from '../svg/sun.svg';
 import {ReactComponent as MoonLogo} from '../svg/moon.svg';
 import {ReactComponent as Logo} from '../svg/Logicsim-logo.svg';
 import { config } from "../../config";
+import DropdownMenu from "./DropdownMenu";
 
 function Header(){
         const context = useContext(ThemeContext);
@@ -13,6 +14,7 @@ function Header(){
             <div className="App-header">
                 <Logo className="logicsim-logo"></Logo>
                 <div className="version">v{config.version}</div>
+                <DropdownMenu name="File" items={["New","Open...","Save", "Save As..."]}></DropdownMenu>
                 <ReactSwitch onChange={context.toggleTheme} checked={context.theme === "dark"} height={20} width={48} onHandleColor="#888" onColor="#fff" activeBoxShadow="0 0 0px 0px #aaa" uncheckedIcon={<SunLogo style={{padding:"2px 0px 0px 0px", fill: "white"}} height="80%"></SunLogo>} checkedIcon={<MoonLogo style={{padding:"2px 0px 0px 7px", fill: "#888"}} height="80%"></MoonLogo>} className="react-switch"/>
             </div>
         );

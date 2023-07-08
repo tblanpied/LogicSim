@@ -9,6 +9,7 @@ import { config } from '../../config';
 import LightBulb from "../../components/js/light_bulb";
 import Switch from "../../components/js/switch";
 import Clock from "../../components/js/clock";
+import PropertiesPanel from "./properties_panel";
 
 class BreadBoard extends React.Component {
   constructor(props) {
@@ -17,6 +18,7 @@ class BreadBoard extends React.Component {
     // Initial state of the component
     this.state = {
       selectedComponentId: null,         // ID of the currently selected component
+      selectedComponent: null,
       components: [],                    // Array of components
       wires: [],                         // Array of wires
       new_component: null,               // Newly created component
@@ -39,6 +41,7 @@ class BreadBoard extends React.Component {
     this.dragging_start_offset = { x: 0, y: 0 };     // Starting offset of the breadboard drag
     this.copied_component = null;
     this.pasting = false;
+    this.properties = [];
 
     this.cursor = {x:0, y: 0};
   
@@ -60,6 +63,7 @@ class BreadBoard extends React.Component {
     this.dragEnd = this.dragEnd.bind(this);
     this.onKeyDown = this.onKeyDown.bind(this);
     this.changeTool = this.changeTool.bind(this);
+    this.updateProperties = this.updateProperties.bind(this);
   }
 
   // componentDidMount: Lifecycle method called after the component is mounted in the DOM
@@ -200,9 +204,24 @@ class BreadBoard extends React.Component {
   // selectComponent: Set the selected component ID and add the active class to the delete button
   selectComponent(id) {
     if(this.state.selected_tool === "select"){
+      var selected_component = this.getComponent(id);
       this.setState({
-        selectedComponentId: id
+        selectedComponentId: id,
+        selectedComponent: selected_component
       });
+
+      this.properties = [];
+      this.properties.push({name:"Name",type:"string",default:selected_component.attributes.name});
+      if(selected_component.attributes.input_names !== null){
+        for(let i = 0; i < selected_component.attributes.input_names.length; i++){
+          this.properties.push({name:"Input name " + i,type:"string",default:selected_component.attributes.input_names[i]});
+        }
+      }
+      if(selected_component.attributes.output_names !== null){
+        for(let i = 0; i < selected_component.attributes.output_names.length; i++){
+          this.properties.push({name:"Output name " + i,type:"string",default:selected_component.attributes.output_names[i]});
+        }
+      }
   
       // Add the active class to the delete button in the toolbar
       document.getElementsByClassName("delete-btn")[0].classList.add("toolbar_active_btn");
@@ -369,26 +388,40 @@ class BreadBoard extends React.Component {
     if (this.state.new_component != null) {
       var inputs = [];
       var outputs = [];
+      var input_names = null;
+      var output_names = null;
+      var human_name = ""
 
       // Set inputs and outputs based on the component type
       if (name === "7segmentdisplay") {
+        human_name = "7 segment display"
         for (let i = 0; i < 8; i++) {
           inputs.push(Object.assign({}, { state: false, connections: [] }));
         }
       } else if (name === "pushbutton") {
+        human_name = "Push button"
         outputs.push(Object.assign({}, { state: false, connections: [] }));
       } else if (name === "andgate") {
+        human_name = "AND gate"
         outputs.push(Object.assign({}, { state: false, connections: [] }));
         inputs.push(Object.assign({}, { state: false, connections: [] }));
         inputs.push(Object.assign({}, { state: false, connections: [] }));
+        input_names = ["a", "b"];
+        output_names = ["output"];
       } else if (name === "notgate") {
+        human_name = "NOT gate"
         outputs.push(Object.assign({}, { state: false, connections: [] }));
         inputs.push(Object.assign({}, { state: false, connections: [] }));
+        input_names = ["input"];
+        output_names = ["output"];
       } else if (name === "lightbulb") {
+        human_name = "Light bulb"
         inputs.push(Object.assign({}, { state: false, connections: [] }));
       } else if (name === "switch") {
+        human_name = "Switch"
         outputs.push(Object.assign({}, { state: false, connections: [] }));
       } else if (name === "clock") {
+        human_name = "Clock"
         outputs.push(Object.assign({}, { state: false, connections: [] }));
       }
 
@@ -396,7 +429,7 @@ class BreadBoard extends React.Component {
       let id = this.getUniqueId();
 
       // Create a new component object with its type, ID, inputs, and outputs
-      const new_component = { type: name, id: id, inputs: inputs, outputs: outputs, attributes: {rotation: 0} };
+      const new_component = { type: name, id: id, inputs: inputs, outputs: outputs, attributes: {name: human_name, input_names: input_names, output_names: output_names, rotation: 0} };
 
       // Update the state with the new_component and set its coordinates based on the new_component
       this.setState(prevState => ({
@@ -778,6 +811,43 @@ class BreadBoard extends React.Component {
     });
   }
 
+  getComponent(component_id){
+    if(component_id === null){
+      return null;
+    }
+    for(let i = 0; i < this.state.components.length; i++){
+      if(this.state.components[i].id === component_id){
+        return this.state.components[i];
+      }
+    }
+    return null;
+  }
+
+  updateProperties(component_id, name, value){
+    if(name.includes("Input name")){
+      const index = parseInt(name.match(/\d+/)[0]);
+      this.setState({
+        components: this.state.components.map((c,i)=>{
+          if(c.id === component_id){
+            c.attributes.input_names[index] = value;
+          }
+          return c;
+        })
+      })
+    }
+    if(name.includes("Output name")){
+      const index = parseInt(name.match(/\d+/)[0]);
+      this.setState({
+        components: this.state.components.map((c,i)=>{
+          if(c.id === component_id){
+            c.attributes.output_names[index] = value;
+          }
+          return c;
+        })
+      })
+    }
+  }
+
   render() {
     var components = [];
     for (let i = 0; i < this.state.components.length; i++) {
@@ -845,6 +915,8 @@ class BreadBoard extends React.Component {
             y={this.components_coords.get(this.state.components[i].id).y}
             inputs={JSON.stringify({a: this.state.components[i].inputs[0].state, b: this.state.components[i].inputs[1].state})}
             rotation={this.state.components[i].attributes.rotation}
+            input_names={JSON.stringify(this.state.components[i].attributes.input_names)}
+            output_names={JSON.stringify(this.state.components[i].attributes.output_names)}
           ></AndGate>
         );
       }
@@ -865,6 +937,8 @@ class BreadBoard extends React.Component {
             y={this.components_coords.get(this.state.components[i].id).y}
             input={this.state.components[i].inputs[0].state}
             rotation={this.state.components[i].attributes.rotation}
+            input_names={JSON.stringify(this.state.components[i].attributes.input_names)}
+            output_names={JSON.stringify(this.state.components[i].attributes.output_names)}
           ></NotGate>
         );
       } else if (this.state.components[i].type === "lightbulb") {
@@ -1117,8 +1191,8 @@ class BreadBoard extends React.Component {
     }
   
     return (
-      <div className="breadboard" style={{cursor: cursor}}onMouseDown={this.handleBreadboardClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
-        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%">
+      <div className="breadboard">
+        <svg version="1.1" xmlns="http://www.w3.org/2000/svg" width="100%" height="100%" style={{cursor: cursor}} onMouseDown={this.handleBreadboardClick} onMouseMove={this.dragging} onMouseUp={this.dragEnd}>
           <g transform={"translate(" + (this.state.dragging ? this.state.dragging_offset.x : this.state.offset.x) + "," + (this.state.dragging ? this.state.dragging_offset.y : this.state.offset.y) + ") scale(" + this.state.zoom + ")"}>
             {components}
             {new_component}
@@ -1126,6 +1200,7 @@ class BreadBoard extends React.Component {
             {wires}
           </g>
         </svg>
+        <PropertiesPanel updateProperties={this.updateProperties} component_id={this.state.selectedComponentId} component_name={this.state.selectedComponent!==null?this.state.selectedComponent.attributes.name:""} properties={JSON.stringify(this.properties)} display={this.state.selectedComponentId !== null}></PropertiesPanel>
       </div>
     );
   }

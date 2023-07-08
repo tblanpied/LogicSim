@@ -18,7 +18,9 @@ const NotGate = React.memo((props) => {
     setCoord,
     onStateChange,
     id,
-    StartEndWire
+    StartEndWire,
+    input_names,
+    output_names
   } = props;
 
   // Initialize state variables
@@ -37,10 +39,14 @@ const NotGate = React.memo((props) => {
     input,
     zoom,
     offset,
-    input_hovered: ""
+    input_hovered: "",
+    input_names: input_names !== undefined? JSON.parse(input_names) : ["input"],
+    output_names: output_names !== undefined? JSON.parse(output_names) : ["output"]
   });
 
   const [outputState, setOutputState] = useState(true);
+
+  const textRefs = useRef([]);
 
   const start_position = useRef({ x: 0, y: 0 });
   const stateRef = useRef(state);
@@ -186,8 +192,20 @@ const NotGate = React.memo((props) => {
         rotation: rotation
       }));
     }
+    if (input_names !== undefined && input_names !== JSON.stringify(state.input_names)) {
+      setState((prevState) => ({
+        ...prevState,
+        input_names: JSON.parse(input_names),
+      }));
+    }
+    if (output_names !== undefined && output_names !== JSON.stringify(state.output_names)) {
+      setState((prevState) => ({
+        ...prevState,
+        output_names: JSON.parse(output_names),
+      }));
+    }
     // eslint-disable-next-line
-  }, [selected, input, zoom, offset, rotation]);
+  }, [selected, input, zoom, offset, rotation, input_names, output_names]);
 
   const handleHover = (e, input) => {
     setState((prevState) => ({
@@ -298,12 +316,10 @@ const NotGate = React.memo((props) => {
         />
         <g>
           <circle className="IO Out-0" onMouseEnter={(e) => {handleHover(e, "Out-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "output")} } cx="184.5" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
-          {state.input_hovered === "Out-0" && (
-          <g>
-            <rect x="210" y="63" width="70" height="25" fill="rgba(0, 0, 0, 0.6)" />
-            <text x="213" y="81"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">output</text>
+          <g className={state.input_hovered === "Out-0"?"":"display-none"}>
+            <rect x={210} y="63" width={state.output_names[0].length ? (textRefs.current[1] !== undefined?textRefs.current[1].getComputedTextLength() + 8 : 0) : 0} height="25" fill="rgba(0, 0, 0, 0.6)" />
+            <text x={213} y="81"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name" ref={(ref) => {textRefs.current[1] = ref; }} >{state.output_names[0]}</text>
           </g>
-          )}
         </g>
         <circle 
           onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "input")} } 
@@ -317,12 +333,10 @@ const NotGate = React.memo((props) => {
         />
         <g>
           <circle className="IO In-0" onMouseEnter={(e) => {handleHover(e, "In-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e, id, "notgate", 0, "input")} }  cx="13.4999" cy="76.5" r="11.5" fill="#FF0000" stroke="black" strokeWidth="4"/>
-          {state.input_hovered === "In-0" && (
-          <g>
-            <rect x="-78" y="63" width="63" height="25" fill="rgba(0, 0, 0, 0.6)" />
-            <text x="-75" y="82"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">input</text>
+          <g className={state.input_hovered === "In-0"?"":"display-none"}>
+            <rect x={-(state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0 )-15} y="63" width={state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0} height="25" fill="rgba(0, 0, 0, 0.6)" />
+            <text x={-(state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0 )-11} y="82"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name" ref={(ref) => {textRefs.current[0] = ref; }} >{state.input_names[0]}</text>
           </g>
-          )}
         </g>
       </g>
     </g>

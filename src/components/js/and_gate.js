@@ -19,7 +19,9 @@ const AndGate = React.memo((props) => {
     setCoord,
     onStateChange,
     id,
-    StartEndWire
+    StartEndWire,
+    input_names,
+    output_names
   } = props;
 
   // Initialize state variables
@@ -36,15 +38,16 @@ const AndGate = React.memo((props) => {
     opacity,
     rotation: rotation !== undefined ? rotation : 0,
     inputs: JSON.parse(inputs),
+    input_names: input_names !== undefined? JSON.parse(input_names) : ["a", "b"],
+    output_names: output_names !== undefined? JSON.parse(output_names) : ["output"],
     zoom,
     offset,
     input_hovered: ""
   });
 
-  /*const width = 206;
-  const height = 106;*/
-
   const [outputState, setOutputState] = useState(false);
+
+  const textRefs = useRef([]);
 
   const start_position = useRef({ x: 0, y: 0 });
   const stateRef = useRef(state);
@@ -186,8 +189,20 @@ const AndGate = React.memo((props) => {
         rotation: rotation
       }));
     }
+    if (input_names !== undefined && input_names !== JSON.stringify(state.input_names)) {
+      setState((prevState) => ({
+        ...prevState,
+        input_names: JSON.parse(input_names),
+      }));
+    }
+    if (output_names !== undefined && output_names !== JSON.stringify(state.output_names)) {
+      setState((prevState) => ({
+        ...prevState,
+        output_names: JSON.parse(output_names),
+      }));
+    }
     // eslint-disable-next-line
-  }, [selected, inputs, zoom, offset, rotation]);
+  }, [selected, inputs, zoom, offset, rotation, input_names, output_names]);
 
   const handleHover = (e, input) => {
     setState((prevState) => ({
@@ -213,6 +228,7 @@ const AndGate = React.memo((props) => {
       height="106"
       viewBox="0 0 206 106"
       fill="none"
+      
     >
       <g className="AndGate">
         <g 
@@ -350,12 +366,10 @@ const AndGate = React.memo((props) => {
         />
         <g>
           <circle className="IO In-1" onMouseEnter={(e) => {handleHover(e, "In-1")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e,id, "andgate", 1, "input")} }  cx="8" cy="83" r="11" fill="#FF0000" stroke="black" strokeWidth="4"/>
-          {state.input_hovered === "In-1" && (
-          <g>
-            <rect x="-35" y="72" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
-            <text x="-31" y="90"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">b</text>
+          <g className={state.input_hovered === "In-1"?"":"display-none"}>
+            <rect x={-(state.input_names[1].length ? (textRefs.current[1] !== undefined?textRefs.current[1].getComputedTextLength() + 10 : 0) : 0 )-15} y="72" width={state.input_names[1].length ? (textRefs.current[1] !== undefined?textRefs.current[1].getComputedTextLength() + 10 : 0) : 0} height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x={-(state.input_names[1].length ? (textRefs.current[1] !== undefined?textRefs.current[1].getComputedTextLength() + 10 : 0) : 0 )-11} y="90"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name" ref={(ref) => {textRefs.current[1] = ref; }} >{state.input_names[1]}</text>
           </g>
-          )}
         </g>
         <circle 
           onMouseDown={(e) => {StartEndWire(e,id, "andgate", 0, "input")} } 
@@ -369,21 +383,17 @@ const AndGate = React.memo((props) => {
         />
         <g>
           <circle className="IO In-0" onMouseEnter={(e) => {handleHover(e, "In-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e,id, "andgate", 0, "input")} } cx="8" cy="23" r="11" fill="#FF0000" stroke="black" strokeWidth="4"/>
-          {state.input_hovered === "In-0" && (
-          <g>
-            <rect x="-35" y="13" width="20" height="21" fill="rgba(0, 0, 0, 0.6)" />
-            <text x="-31" y="29.5"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">a</text>
+          <g className={state.input_hovered === "In-0"?"":"display-none"}>
+            <rect x={-(state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0 )-15} y="12" width={state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0} height="21" fill="rgba(0, 0, 0, 0.6)" />
+            <text x={-(state.input_names[0].length ? (textRefs.current[0] !== undefined?textRefs.current[0].getComputedTextLength() + 10 : 0) : 0 )-11} y="30"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name" ref={(ref) => {textRefs.current[0] = ref; }} >{state.input_names[0]}</text>
           </g>
-          )}
         </g>
         <g>
           <circle className="IO Out-0" onMouseEnter={(e) => {handleHover(e, "Out-0")}} onMouseLeave={handleMouseLeave} onMouseDown={(e) => {StartEndWire(e,id, "andgate", 0, "output")} } cx="198" cy="53" r="11" fill="#FF0000" stroke="black" strokeWidth="4"/>
-          {state.input_hovered === "Out-0" && (
-          <g>
-            <rect x="223" y="41" width="70" height="23" fill="rgba(0, 0, 0, 0.6)" />
-            <text x="225" y="58"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name">output</text>
+          <g className={state.input_hovered === "Out-0"?"":"display-none"}>
+            <rect x={223} y="41" width={state.output_names[0].length ? (textRefs.current[2] !== undefined?textRefs.current[2].getComputedTextLength() + 6 : 0) : 0} height="23" fill="rgba(0, 0, 0, 0.6)" />
+            <text x={225} y="58"  fontWeight="700" letterSpacing="-2px" fontFamily='"Lucida Console", Monaco, monospace' fontSize="1.3em" fill="rgba(255, 255, 255)" className="input-name" ref={(ref) => {textRefs.current[2] = ref; }} >{state.output_names[0]}</text>
           </g>
-          )}
         </g>
       </g>
     </g>     
