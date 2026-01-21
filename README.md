@@ -4,6 +4,7 @@ A simple React web application for simulating digital logic circuits. This proje
 
 * **Author:** Timothée Blanpied
 * **Created:** 2023/07
+* **Live Demo:** [https://logicsim.demo.blanpied.fr](https://logicsim.demo.blanpied.fr)
 
 ## Features
 
