@@ -1,0 +1,26 @@
+{
+  "files": {
+    "main.css": "/static/css/main.3b2b2644.css",
+    "main.js": "/static/js/main.c13fcd79.js",
+    "static/media/Logicsim-logo.svg": "/static/media/Logicsim-logo.f7fe564ab7ff7316b09928db6923c080.svg",
+    "static/media/paste.svg": "/static/media/paste.d8920c434fd7c61558594739e8d24911.svg",
+    "static/media/select.svg": "/static/media/select.21c9ce6bcd59e7c750f2d691fa08ca3f.svg",
+    "static/media/search.svg": "/static/media/search.dcc917b4aaedba50220f7e8a520b49a2.svg",
+    "static/media/rotate-left.svg": "/static/media/rotate-left.2b07e9b6563c088cc1fcd164238bc7f0.svg",
+    "static/media/rotate-right.svg": "/static/media/rotate-right.377c31c276c93ae33fa4d8becd1fbe4f.svg",
+    "static/media/zoom-in.svg": "/static/media/zoom-in.36d2b384e6acf4eb1de01fb7f6455926.svg",
+    "static/media/sun.svg": "/static/media/sun.47ca21b0c1e61e624ac761715a7783c4.svg",
+    "static/media/copy.svg": "/static/media/copy.5d6c2d04e7fc7c32e068dddef1eefedf.svg",
+    "static/media/zoom-out.svg": "/static/media/zoom-out.14dafeeadd2e72c48ee46e7f9b4dc9d3.svg",
+    "static/media/moon.svg": "/static/media/moon.3faf560f51b0b30d37d08bf4da2967a3.svg",
+    "static/media/move-hand.svg": "/static/media/move-hand.68831d79bb53e3db20d40cda56c06686.svg",
+    "static/media/delete.svg": "/static/media/delete.534b1c0620e1b93b8bfa03b869900afb.svg",
+    "index.html": "/index.html",
+    "static/media/simple-arrow-left.svg": "/static/media/simple-arrow-left.c46368244a2098b56168ee50a7e8cde6.svg",
+    "static/media/close-icon.svg": "/static/media/close-icon.d4b33b34d1dea1a3d4a369f771d1ecb5.svg"
+  },
+  "entrypoints": [
+    "static/css/main.3b2b2644.css",
+    "static/js/main.c13fcd79.js"
+  ]
+}
