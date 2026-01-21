@@ -1,38 +1,86 @@
-## Install
-* Node >= 8.10 :
+# LogicSim
 
-* npm >= 5.6 :
+A simple React web application for simulating digital logic circuits. This project allows users to build and test logic circuits using drag-and-drop components.
 
-* npm packages :
+* **Author:** Timothée Blanpied
+* **Created:** 2023/07
+
+## Features
+
+- Drag-and-drop logic gates (AND, NOT)
+- Interactive components: Push Button, Switch, Light Bulb, Clock, 7-Segment Display
+- Custom SVG-based wire connections that light up when signals pass through
+- Zoom and pan functionality
+- Dark/light theme toggle
+
+## Tech Stack
+
+- React 18
+- JavaScript (ES6+)
+- HTML5
+- CSS3
+- Custom SVG for components and wires
+
+## Installation
+
+### Prerequisites
+
+- Node.js >= 8.10
+- npm >= 5.6
+
+### Setup
+
+1. Clone the repository:
+   ```bash
+   git clone https://github.com/tblanpied/LogicSim.git
+   cd logicsim
+   ```
+
+2. Install dependencies:
+   ```bash
+   npm install
+   ```
+
+3. Start the development server:
+   ```bash
+   npm start
+   ```
+
+   Open [http://localhost:3000](http://localhost:3000) in your browser.
+
+## Usage
+
+- Select components from the sidebar and drag them onto the breadboard.
+- Connect components by drawing wires between connection points.
+- Use the toolbar to select, delete, or rotate components.
+- Toggle switches and buttons to see circuit behavior in real-time.
+
+## Project Structure
+
 ```
-$ npm install react-switch
+src/
+├── components/          # Logic gate and component implementations
+│   ├── js/             # Component logic
+│   ├── css/            # Component styles
+│   ├── svg/            # Custom SVG assets
+│   └── img/            # Images
+├── UI/                 # User interface components
+│   ├── js/             # UI component logic
+│   ├── css/            # UI styles
+│   └── svg/            # UI icons
+├── App.js              # Main app component
+├── index.js            # App entry point
+└── config.js           # Configuration
 ```
 
-## Available Scripts
+## Limitations
 
-In the project directory, you can run:
+- No saving/loading of circuits
+- Limited to predefined components (no custom gates)
+- Prototype-level implementation
 
-### `npm start`
+## License
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in your browser.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-The page will reload when you make changes.\
-You may also see any lint errors in the console.
-
-### `npm run build`
-
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
-
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
-
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
-
-## Deploy
-
-```
-$ sudo npm install -g serve
-$ serve -s build/
-```
+This project is provided as-is for educational purposes and is not actively maintained for contributions.

@@ -1,9 +1,14 @@
 import "../css/wire.css";
-import React, { useState, useEffect, useRef, useCallback, useMemo} from "react";
-import { config } from '../../config';
+import React, {
+  useState,
+  useEffect,
+  useRef,
+  useCallback,
+  useMemo,
+} from "react";
+import { config } from "../../config";
 
 const Wire = React.memo((props) => {
-
   // Destructure props
   const {
     points: propsPoints,
@@ -27,7 +32,7 @@ const Wire = React.memo((props) => {
   const [state, setState] = useState({
     points: propsPoints,
     dragging: false,
-    drawing: propsDrawing != undefined ? propsDrawing : false,
+    drawing: propsDrawing !== undefined ? propsDrawing : false,
     point_dragged: propsPointDragged !== undefined ? propsPointDragged : null,
     selected: propsSelected,
     active: propsActive === undefined ? false : propsActive,
@@ -45,18 +50,18 @@ const Wire = React.memo((props) => {
   stateRef.current = state;
 
   useEffect(() => {
-    if(state.drawing){
+    if (state.drawing) {
       setState((prevState) => ({
         ...prevState,
-        dragging: true
+        dragging: true,
       }));
       // Add event listeners for wire drawing
       document.addEventListener("mousemove", _dragging);
       document.addEventListener("mousedown", addPoint, { capture: true });
       return () => {
-        document.removeEventListener('mousemove', _dragging);
+        document.removeEventListener("mousemove", _dragging);
         document.removeEventListener("mousedown", addPoint, { capture: true });
-      }
+      };
     }
     // eslint-disable-next-line
   }, []);
@@ -73,10 +78,10 @@ const Wire = React.memo((props) => {
       }
 
       const targetend = document.getElementsByClassName(
-        `Component-${state.end.type}-${state.end.id}`
+        `Component-${state.end.type}-${state.end.id}`,
       );
       const targetstart = document.getElementsByClassName(
-        `Component-${state.start.type}-${state.start.id}`
+        `Component-${state.start.type}-${state.start.id}`,
       );
 
       // Observer for the start component
@@ -86,17 +91,17 @@ const Wire = React.memo((props) => {
             var target =
               state.start.IO === "output"
                 ? targetstart[0].getElementsByClassName(
-                  `Out-${state.start.index}`
-                )[0]
+                    `Out-${state.start.index}`,
+                  )[0]
                 : targetstart[0].getElementsByClassName(
-                  `In-${state.start.index}`
-                )[0];
+                    `In-${state.start.index}`,
+                  )[0];
             var center = {
               x:
                 (target.getBoundingClientRect().left +
                   target.getBoundingClientRect().width / 2 -
                   state.offset.x) /
-                  state.zoom,
+                state.zoom,
               y:
                 (target.getBoundingClientRect().top +
                   target.getBoundingClientRect().height / 2 -
@@ -126,22 +131,22 @@ const Wire = React.memo((props) => {
             var target =
               state.end.IO === "output"
                 ? targetend[0].getElementsByClassName(
-                  `Out-${state.end.index}`
-                )[0]
+                    `Out-${state.end.index}`,
+                  )[0]
                 : targetend[0].getElementsByClassName(
-                  `In-${state.end.index}`
-                )[0];
+                    `In-${state.end.index}`,
+                  )[0];
             var center = {
               x:
                 (target.getBoundingClientRect().left +
                   target.getBoundingClientRect().width / 2 -
                   state.offset.x) /
-                  state.zoom,
+                state.zoom,
               y:
                 (target.getBoundingClientRect().top +
                   target.getBoundingClientRect().height / 2 -
                   state.offset.y) /
-                  state.zoom,
+                state.zoom,
             };
             setState((prevState) => ({
               ...prevState,
@@ -163,15 +168,14 @@ const Wire = React.memo((props) => {
         start_observer,
         end_observer,
       }));
-    } 
+    }
     // eslint-disable-next-line
-  }, [state.zoom, state.offset]); 
+  }, [state.zoom, state.offset]);
 
-  // useEffect to update the observation of the start and end components output / input 
+  // useEffect to update the observation of the start and end components output / input
   useEffect(() => {
     observe();
   }, [observe]);
-
 
   // Adjusts the brightness of a color by the given amount
   const LightenDarkenColor = useCallback((col, amt) => {
@@ -205,11 +209,11 @@ const Wire = React.memo((props) => {
   // Event handler for dragging start
   const dragStart = useCallback((e, i) => {
     e.stopPropagation();
-    if(i !== 0 && i !== stateRef.current.points.length - 1){
+    if (i !== 0 && i !== stateRef.current.points.length - 1) {
       setState((prevState) => ({
         ...prevState,
         dragging: true,
-        point_dragged: i
+        point_dragged: i,
       }));
       document.addEventListener("mousemove", _dragging);
       document.addEventListener("mouseup", dragEnd);
@@ -227,7 +231,7 @@ const Wire = React.memo((props) => {
       points[stateRef.current.point_dragged] = point;
       setState((prevState) => ({
         ...prevState,
-        points: points
+        points: points,
       }));
     }
   }, []);
@@ -237,9 +241,14 @@ const Wire = React.memo((props) => {
     setState((prevState) => ({
       ...prevState,
       dragging: false,
-      point_dragged: null
+      point_dragged: null,
     }));
-    updateWirePoint(id, stateRef.current.point_dragged, stateRef.current.points[stateRef.current.point_dragged].x, stateRef.current.points[stateRef.current.point_dragged].y);
+    updateWirePoint(
+      id,
+      stateRef.current.point_dragged,
+      stateRef.current.points[stateRef.current.point_dragged].x,
+      stateRef.current.points[stateRef.current.point_dragged].y,
+    );
     document.removeEventListener("mousemove", _dragging);
     document.removeEventListener("mouseup", dragEnd);
     // eslint-disable-next-line
@@ -247,7 +256,11 @@ const Wire = React.memo((props) => {
 
   // Function used to add point when clicked and give this point to the parent
   const addPoint = (e) => {
-    addWirePoint(e, stateRef.current.points[stateRef.current.point_dragged].x, stateRef.current.points[stateRef.current.point_dragged].y);
+    addWirePoint(
+      e,
+      stateRef.current.points[stateRef.current.point_dragged].x,
+      stateRef.current.points[stateRef.current.point_dragged].y,
+    );
   };
 
   // ComponentDidUpdate
@@ -256,7 +269,7 @@ const Wire = React.memo((props) => {
     if (props.selected !== state.selected) {
       setState((prevState) => ({
         ...prevState,
-        selected: props.selected
+        selected: props.selected,
       }));
     }
 
@@ -264,7 +277,7 @@ const Wire = React.memo((props) => {
     if (props.points.length !== state.points.length) {
       setState((prevState) => ({
         ...prevState,
-        points: props.points
+        points: props.points,
       }));
     }
 
@@ -272,16 +285,19 @@ const Wire = React.memo((props) => {
     if (props.active !== state.active) {
       setState((prevState) => ({
         ...prevState,
-        active: props.active
+        active: props.active,
       }));
       onStateChange(state.end.id, props.active, state.end.index);
     }
 
     // Check if the point_dragged prop has changed
-    if (props.point_dragged !== undefined && props.point_dragged !== state.point_dragged) {
+    if (
+      props.point_dragged !== undefined &&
+      props.point_dragged !== state.point_dragged
+    ) {
       setState((prevState) => ({
         ...prevState,
-        point_dragged: props.point_dragged
+        point_dragged: props.point_dragged,
       }));
     }
 
@@ -289,43 +305,59 @@ const Wire = React.memo((props) => {
     if (props.zoom !== state.zoom) {
       setState((prevState) => ({
         ...prevState,
-        zoom: props.zoom
+        zoom: props.zoom,
       }));
     }
 
     if (props.offset !== state.offset) {
       setState((prevState) => ({
         ...prevState,
-        offset: props.offset
+        offset: props.offset,
       }));
     }
 
-    if(props.dragging !== undefined && props.dragging !== state.dragging){
+    if (props.dragging !== undefined && props.dragging !== state.dragging) {
       setState((prevState) => ({
         ...prevState,
-        dragging: props.dragging
+        dragging: props.dragging,
       }));
-      if(props.dragging){
+      if (props.dragging) {
         document.addEventListener("mousemove", _dragging);
       } else {
         document.removeEventListener("mousemove", _dragging);
       }
     }
     // eslint-disable-next-line
-  }, [props.selected, props.points, props.active, props.zoom, props.offset, props.point_dragged, props.dragging]);
+  }, [
+    props.selected,
+    props.points,
+    props.active,
+    props.zoom,
+    props.offset,
+    props.point_dragged,
+    props.dragging,
+  ]);
 
   const strokeWidth = props.strokeWidth === undefined ? 1 : props.strokeWidth;
-  const strokeColor = props.strokeColor === undefined ? "#000000" : props.strokeColor;
-  const strokeBorder = props.strokeBorder === undefined ? 0 : props.strokeBorder;
+  const strokeColor =
+    props.strokeColor === undefined ? "#000000" : props.strokeColor;
+  const strokeBorder =
+    props.strokeBorder === undefined ? 0 : props.strokeBorder;
   const inactiveColor = useMemo(() => {
-    return LightenDarkenColor(strokeColor, -175)
+    return LightenDarkenColor(strokeColor, -175);
     // eslint-disable-next-line
   }, [strokeColor]);
 
   // Calculate angle between three points
   const angle = useCallback((A, B, C) => {
-    return (((Math.atan2(C.y - B.y, C.x - B.x) - Math.atan2(A.y - B.y, A.x - B.x) + 3 * Math.PI) % (2 * Math.PI)) - Math.PI);
-  }, [])
+    return (
+      ((Math.atan2(C.y - B.y, C.x - B.x) -
+        Math.atan2(A.y - B.y, A.x - B.x) +
+        3 * Math.PI) %
+        (2 * Math.PI)) -
+      Math.PI
+    );
+  }, []);
 
   // Initialize variables
   var data = "";
@@ -340,13 +372,19 @@ const Wire = React.memo((props) => {
     // Add points (circles) for the first point if selected
     points.push(
       <g
-        onMouseDown={(e) => {dragStart(e, 0);}}
+        onMouseDown={(e) => {
+          dragStart(e, 0);
+        }}
         key={key++}
       >
         <circle
           key={key++}
           fill={state.active ? strokeColor : inactiveColor}
-          stroke={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)}
+          stroke={
+            state.active
+              ? LightenDarkenColor(strokeColor, -50)
+              : LightenDarkenColor(inactiveColor, -25)
+          }
           strokeWidth={2}
           cx={state.points[0].x}
           cy={state.points[0].y}
@@ -354,32 +392,62 @@ const Wire = React.memo((props) => {
         />
         <circle
           key={key++}
-          fill={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)}
+          fill={
+            state.active
+              ? LightenDarkenColor(strokeColor, -50)
+              : LightenDarkenColor(inactiveColor, -25)
+          }
           cx={state.points[0].x}
           cy={state.points[0].y}
           r={3}
         />
-      </g>
+      </g>,
     );
   }
 
   // Snap to horizontal or vertical lines when the wire is being drawn
-  if (state.dragging && state.point_dragged !== null && state.point_dragged === state.points.length - 1) {
-    var dxa = state.points[state.point_dragged].x - state.points[state.point_dragged - 1].x;
-    var dya = state.points[state.point_dragged].y - state.points[state.point_dragged - 1].y;
+  if (
+    state.dragging &&
+    state.point_dragged !== null &&
+    state.point_dragged === state.points.length - 1
+  ) {
+    var dxa =
+      state.points[state.point_dragged].x -
+      state.points[state.point_dragged - 1].x;
+    var dya =
+      state.points[state.point_dragged].y -
+      state.points[state.point_dragged - 1].y;
     //hozizontal
     if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
       dya = 0;
-      state.points[state.point_dragged].y = state.points[state.point_dragged - 1].y;
-      snap_data += "M" + (-state.offset.x / state.zoom) + "," + state.points[state.point_dragged].y;
-      snap_data += "L" + (window.screen.width - state.offset.x) / state.zoom + "," + state.points[state.point_dragged].y;
+      state.points[state.point_dragged].y =
+        state.points[state.point_dragged - 1].y;
+      snap_data +=
+        "M" +
+        -state.offset.x / state.zoom +
+        "," +
+        state.points[state.point_dragged].y;
+      snap_data +=
+        "L" +
+        (window.screen.width - state.offset.x) / state.zoom +
+        "," +
+        state.points[state.point_dragged].y;
     }
-    //vertical 
+    //vertical
     if (dxa <= config.wire.snap_range && dxa >= -config.wire.snap_range) {
       dxa = 0;
-      state.points[state.point_dragged].x = state.points[state.point_dragged - 1].x;
-      snap_data += "M" + state.points[state.point_dragged].x + "," + (-state.offset.y / state.zoom);
-      snap_data += "L" + state.points[state.point_dragged].x + "," + (window.screen.height - state.offset.y) / state.zoom;
+      state.points[state.point_dragged].x =
+        state.points[state.point_dragged - 1].x;
+      snap_data +=
+        "M" +
+        state.points[state.point_dragged].x +
+        "," +
+        -state.offset.y / state.zoom;
+      snap_data +=
+        "L" +
+        state.points[state.point_dragged].x +
+        "," +
+        (window.screen.height - state.offset.y) / state.zoom;
     }
   }
 
@@ -392,58 +460,104 @@ const Wire = React.memo((props) => {
     var dyb = state.points[i + 1].y - state.points[i].y;
 
     // Snap to horizontal or vertical lines if dragged close enough
-    if (state.dragging && state.point_dragged !== null && state.point_dragged === i) {
+    if (
+      state.dragging &&
+      state.point_dragged !== null &&
+      state.point_dragged === i
+    ) {
       //va hozizontal
       if (dya <= config.wire.snap_range && dya >= -config.wire.snap_range) {
         dya = 0;
         state.points[i].y = state.points[i - 1].y;
-        snap_data += "M" + (-state.offset.x / state.zoom) + "," + state.points[i].y;
-        snap_data += "L" + (window.screen.width - state.offset.x) / state.zoom + "," + state.points[i].y;
+        snap_data +=
+          "M" + -state.offset.x / state.zoom + "," + state.points[i].y;
+        snap_data +=
+          "L" +
+          (window.screen.width - state.offset.x) / state.zoom +
+          "," +
+          state.points[i].y;
       }
       //vb hozizontal
       if (dyb <= config.wire.snap_range && dyb >= -config.wire.snap_range) {
         dyb = 0;
         state.points[i].y = state.points[i + 1].y;
-        snap_data += "M" + (-state.offset.x / state.zoom) + "," + state.points[i].y;
-        snap_data += "L" + (window.screen.width - state.offset.x) / state.zoom + "," + state.points[i].y;
+        snap_data +=
+          "M" + -state.offset.x / state.zoom + "," + state.points[i].y;
+        snap_data +=
+          "L" +
+          (window.screen.width - state.offset.x) / state.zoom +
+          "," +
+          state.points[i].y;
       }
-      //va vertical 
+      //va vertical
       if (dxa <= config.wire.snap_range && dxa >= -config.wire.snap_range) {
         dxa = 0;
         state.points[i].x = state.points[i - 1].x;
-        snap_data += "M" + state.points[i].x + "," + (-state.offset.y / state.zoom);
-        snap_data += "L" + state.points[i].x + "," + (window.screen.height - state.offset.y) / state.zoom;
+        snap_data +=
+          "M" + state.points[i].x + "," + -state.offset.y / state.zoom;
+        snap_data +=
+          "L" +
+          state.points[i].x +
+          "," +
+          (window.screen.height - state.offset.y) / state.zoom;
       }
       //vb vertical
       if (dxb <= config.wire.snap_range && dxb >= -config.wire.snap_range) {
         dxb = 0;
         state.points[i].x = state.points[i + 1].x;
-        snap_data += "M" + state.points[i].x + "," + (-state.offset.y / state.zoom);
-        snap_data += "L" + state.points[i].x + "," + (window.screen.height - state.offset.y) / state.zoom;
+        snap_data +=
+          "M" + state.points[i].x + "," + -state.offset.y / state.zoom;
+        snap_data +=
+          "L" +
+          state.points[i].x +
+          "," +
+          (window.screen.height - state.offset.y) / state.zoom;
       }
     }
 
     var va = {
-      x: (dxa === 0 && dya === 0) ? 0 : dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
-      y: (dxa === 0 && dya === 0) ? 0 : dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+      x:
+        dxa === 0 && dya === 0
+          ? 0
+          : dxa / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+      y:
+        dxa === 0 && dya === 0
+          ? 0
+          : dya / Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
     };
     var vb = {
-      x: (dxb === 0 && dyb === 0) ? 0 : dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
-      y: (dxb === 0 && dyb === 0) ? 0 : dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      x:
+        dxb === 0 && dyb === 0
+          ? 0
+          : dxb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      y:
+        dxb === 0 && dyb === 0
+          ? 0
+          : dyb / Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
     };
 
-    var angleBetweenLines = Math.acos((-va.x) * vb.x + (-va.y) * vb.y);
+    var angleBetweenLines = Math.acos(-va.x * vb.x + -va.y * vb.y);
     var r = 0;
-    if (Math.tan((angleBetweenLines) / 2) !== 0) {
-      r = radius / Math.tan((angleBetweenLines) / 2);
+    if (Math.tan(angleBetweenLines / 2) !== 0) {
+      r = radius / Math.tan(angleBetweenLines / 2);
     }
     if (r > 25) {
       r = 25;
-      radius = Math.tan((angleBetweenLines) / 2) * r;
+      radius = Math.tan(angleBetweenLines / 2) * r;
     }
-    if (r !== Math.min(r, Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)), Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)))) {
-      r = Math.min(Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)), Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)));
-      radius = Math.tan((angleBetweenLines) / 2) * r;
+    if (
+      r !==
+      Math.min(
+        r,
+        Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+        Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      )
+    ) {
+      r = Math.min(
+        Math.sqrt(Math.pow(dxa, 2) + Math.pow(dya, 2)),
+        Math.sqrt(Math.pow(dxb, 2) + Math.pow(dyb, 2)),
+      );
+      radius = Math.tan(angleBetweenLines / 2) * r;
     }
     var ka = {
       x: state.points[i - 1].x + (dxa - va.x * r),
@@ -456,67 +570,109 @@ const Wire = React.memo((props) => {
 
     // Build path data for the curve
     data += " L" + ka.x + "," + ka.y;
-    data += " A" + radius + " " + radius + " " + 0 + " " + 0 + " " + (angle(kb, ka, state.points[i]) > 0 ? 0 : 1) + " " + kb.x + "," + kb.y;
+    data +=
+      " A" +
+      radius +
+      " " +
+      radius +
+      " " +
+      0 +
+      " " +
+      0 +
+      " " +
+      (angle(kb, ka, state.points[i]) > 0 ? 0 : 1) +
+      " " +
+      kb.x +
+      "," +
+      kb.y;
 
     if (state.selected) {
       // Add points (circles) for each curve if selected
       points.push(
-        <g 
-          onMouseDown={(e) => { dragStart(e, i) }} 
-          key={key++}>
-          <circle 
-            key={key++} 
-            fill={state.active ? strokeColor : inactiveColor} 
-            stroke={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)} 
-            strokeWidth={2} 
-            cx={state.points[i].x} 
-            cy={state.points[i].y} 
-            r={7} 
+        <g
+          onMouseDown={(e) => {
+            dragStart(e, i);
+          }}
+          key={key++}
+        >
+          <circle
+            key={key++}
+            fill={state.active ? strokeColor : inactiveColor}
+            stroke={
+              state.active
+                ? LightenDarkenColor(strokeColor, -50)
+                : LightenDarkenColor(inactiveColor, -25)
+            }
+            strokeWidth={2}
+            cx={state.points[i].x}
+            cy={state.points[i].y}
+            r={7}
           />
-          <circle 
-            key={key++} 
-            fill={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)} 
-            cx={state.points[i].x} 
-            cy={state.points[i].y} 
-            r={3} 
+          <circle
+            key={key++}
+            fill={
+              state.active
+                ? LightenDarkenColor(strokeColor, -50)
+                : LightenDarkenColor(inactiveColor, -25)
+            }
+            cx={state.points[i].x}
+            cy={state.points[i].y}
+            r={3}
           />
-        </g>
+        </g>,
       );
     }
   }
 
   // Connect the last point with a straight line
-  data += " L" + state.points[state.points.length - 1].x + "," + state.points[state.points.length - 1].y;
+  data +=
+    " L" +
+    state.points[state.points.length - 1].x +
+    "," +
+    state.points[state.points.length - 1].y;
 
   // Add points (circles) for the last point if selected
   if (state.selected) {
     points.push(
-      <g 
-        onMouseDown={(e) => { dragStart(e, state.points.length - 1) }} 
+      <g
+        onMouseDown={(e) => {
+          dragStart(e, state.points.length - 1);
+        }}
         key={key++}
       >
-        <circle 
-          key={key++} 
-          fill={state.active ? strokeColor : inactiveColor} 
-          stroke={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)} 
-          strokeWidth={2} 
-          cx={state.points[state.points.length - 1].x} 
-          cy={state.points[state.points.length - 1].y} 
-          r={7} 
+        <circle
+          key={key++}
+          fill={state.active ? strokeColor : inactiveColor}
+          stroke={
+            state.active
+              ? LightenDarkenColor(strokeColor, -50)
+              : LightenDarkenColor(inactiveColor, -25)
+          }
+          strokeWidth={2}
+          cx={state.points[state.points.length - 1].x}
+          cy={state.points[state.points.length - 1].y}
+          r={7}
         />
-        <circle 
-          key={key++} 
-          fill={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)} 
-          cx={state.points[state.points.length - 1].x} 
-          cy={state.points[state.points.length - 1].y} 
-          r={3} 
+        <circle
+          key={key++}
+          fill={
+            state.active
+              ? LightenDarkenColor(strokeColor, -50)
+              : LightenDarkenColor(inactiveColor, -25)
+          }
+          cx={state.points[state.points.length - 1].x}
+          cy={state.points[state.points.length - 1].y}
+          r={3}
         />
-      </g>
+      </g>,
     );
   }
 
   return (
-    <g className={"wire" + (state.selected ? "" : " wire-hover")} style={state.style}>
+    <g
+      className={"wire" + (state.selected ? "" : " wire-hover")}
+      style={state.style}
+    >
       <path
         className={"snap-line"}
         d={snap_data}
@@ -526,8 +682,7 @@ const Wire = React.memo((props) => {
         strokeLinejoin="round"
         stroke="#3399ff"
         strokeDasharray="6 4"
-      >
-      </path>
+      ></path>
       <path
         className={"wire-background" + (state.selected ? "-selected" : "")}
         d={data}
@@ -535,17 +690,27 @@ const Wire = React.memo((props) => {
         strokeWidth={strokeWidth * 4}
         strokeLinecap="round"
         strokeLinejoin="round"
-        onMouseDown={(e) => { e.stopPropagation(); onClick(id); }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onClick(id);
+        }}
       ></path>
       {strokeBorder !== 0 ? (
         <path
           d={data}
           fill="none"
-          stroke={state.active ? LightenDarkenColor(strokeColor, -50) : LightenDarkenColor(inactiveColor, -25)}
+          stroke={
+            state.active
+              ? LightenDarkenColor(strokeColor, -50)
+              : LightenDarkenColor(inactiveColor, -25)
+          }
           strokeWidth={strokeWidth + strokeBorder}
           strokeLinecap="round"
           strokeLinejoin="round"
-          onMouseDown={(e) => { e.stopPropagation(); onClick(id); }}
+          onMouseDown={(e) => {
+            e.stopPropagation();
+            onClick(id);
+          }}
         ></path>
       ) : (
         ""
@@ -557,12 +722,14 @@ const Wire = React.memo((props) => {
         strokeWidth={strokeWidth}
         strokeLinecap="round"
         strokeLinejoin="round"
-        onMouseDown={(e) => { e.stopPropagation(); onClick(id); }}
+        onMouseDown={(e) => {
+          e.stopPropagation();
+          onClick(id);
+        }}
       ></path>
       {points}
     </g>
   );
-
 });
 
 export default Wire;
